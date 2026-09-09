@@ -54,8 +54,8 @@
         show_progress_bar: true,
         message_progress_bar: 'Progress',
         on_finish: function() {
-            jsPsych.data.displayData('json');
-           // window.location.href = 'https://lerenkijken.nl/';
+            // jsPsych.data.displayData('json');
+            window.location.href = 'https://lerenkijken.nl/';
         }
 
     });
@@ -1064,8 +1064,8 @@
         type: jsPsychHtmlButtonResponse,
         stimulus: () =>{return `<h1>Dat was 'm!</h1>` +
         "<p>Je hebt alle beelden gecontroleerd!</p>" +
-        `Je hebt ${n_targets_found} van de ${n_hits+n_misses} gevaarlijke situaties gespot!<br>` +
-        `Je zocht ongeveer ${(mean_rt/1000).toFixed(1)} seconden per keer.<br>`
+        `Je hebt XXX van de XXX gevaarlijke situaties gespot!<br>` +
+        `Je zocht ongeveer XXX seconden per keer.<br>`
         }  ,
         grid_rows:2,
         choices: ["Probeer het nog eens!", "Doe een ander Experiment"] ,
@@ -1075,7 +1075,7 @@
         on_finish: function(){
             let resp_idx = jsPsych.data.get().last().select('response').values[0]
             if (resp_idx == 0){
-                window.top.location.href = 'https://lerenkijken.nl/experiment/doorzoek-de-bagage'
+                window.top.location.href = 'https://lerenkijken.nl/#experimenten'
             }
             if (resp_idx == 1){
                 window.top.location.href = 'https://lerenkijken.nl/#experimenten'; // fix url that stays on exp. maybe iframe issue??
