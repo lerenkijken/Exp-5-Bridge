@@ -1,0 +1,194 @@
+
+html, body {
+  overscroll-behavior: none;
+      -webkit-user-select: none; /* Safari */
+            user-select: none;
+}
+
+.jspsych-display-element {
+  /* font-size: 25px; */
+  background-color: black;
+  color: white;
+ 
+}
+
+.jspsych-content {
+  background-color: black;
+  color: white;
+  position: fixed;
+  
+  left: 50%; 
+  transform: translateX(-50%);
+}
+/* Generic button */
+.jspsych-btn {
+    font-size: large; 
+    padding: 0.4em 0.9em;
+    border: 10px solid transparent;
+    border-radius: 1em;
+    color: white;
+    background-color: #2b00c8d0;
+    font-family: Malington;
+    -webkit-user-select: none; /* Safari */
+            user-select: none; 
+    margin: 0.5em        
+}
+.jspsych-btn:hover {
+  background-color: #2b00c8; 
+  border-color: #2b00c8;
+  color: white;
+  margin: 0.5em     
+}
+.jspsych-btn:disabled {
+  background-color: #2b00c800;
+  color: #aaaaaa00;
+  border-color: #d13d3d00;
+  cursor:auto;
+}
+
+
+/* Save bridge button */
+.jspsych-btn-save {
+    font-size: large; 
+    padding: 0.4em 1.5em;
+    margin: 1em 2em;   
+    border: 10px solid transparent;
+    border-radius: 1em;
+    color: white;
+    background-color: #0084ffd0;
+    font-family: Malington;
+    -webkit-user-select: none; /* Safari */
+            user-select: none; 
+
+}
+.jspsych-btn-save:hover {
+  background-color: #0084ff; 
+  border-color: #0084ff;
+  color: white;
+}
+.jspsych-btn-save:disabled {
+  background-color: #0084ff3f;
+  border-color:  #0084ff3f;
+  cursor:auto;
+}
+
+/*  Danger bridge button*/
+.jspsych-btn-danger {
+    font-size: large; 
+    padding: 0.4em 1.5em;
+    margin: 1em 2em;   
+    border: 10px solid transparent;
+    border-radius: 1em;
+    color: white;
+    background-color: #d20000;
+    font-family: Malington;
+    -webkit-user-select: none; /* Safari */
+            user-select: none; 
+}
+.jspsych-btn-danger:hover {
+  background-color: rgba(255,0,0,150);
+  border-color: rgba(255,0,0,150);
+  color: white;
+}
+.jspsych-btn-danger:disabled {
+  background-color: #d200003f;
+  border-color:  #d200003f;
+  cursor:auto;
+}
+
+
+
+
+
+.jspsych-slider::-webkit-slider-thumb {
+    border: 10px solid #2b00c8;
+    height: 80px;
+    width: 80px;
+    border-radius: 40px;
+    background: white;
+    margin-top: -20px;
+}   
+
+.jspsych-slider::-webkit-slider-runnable-track {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 60%;
+    height: 50px;
+    cursor: pointer;
+    background: #2b00c820;
+    box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
+    border-radius: 5px;
+    border: 5px solid #2b00c8;
+}     
+
+
+.noselect {
+    -webkit-user-select: none; /* Safari */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome, Edge, Opera and Firefox */
+}
+
+#jspsych-progressbar-container {
+    color: #000000e9;
+    border-bottom: 5px solid white;
+    background-color: #000000;
+}
+
+#jspsych-progressbar-container span {
+    /* font-size: 20px; */
+    padding-right: 25px;
+}
+
+#jspsych-progressbar-outer {
+    background-color: #2b00c880;
+}
+
+#jspsych-progressbar-inner {
+    background-color: #2d00c8;
+}
+
+
+/* Fonts */
+@font-face {
+  font-family: Malington; /* set name */
+  src: url(font_faces/Malinton-Semibold.ttf); /* url of the font */
+}
+
+@font-face {
+  font-family: Inter; /* set name */
+  src: url(font_faces/Inter_24pt-Regular.ttf); /* url of the font */
+}
+
+@font-face {
+  font-family: Inter; /* set name */
+  src: url(font_faces/Inter_24pt-Bold.ttf); /* url of the font */
+  font-weight: bold;
+}
+@font-face {
+  font-family: Inter; /* set name */
+  src: url(font_faces/Inter_24pt-Italic.ttf); /* url of the font */
+  font-style: italic;
+}
+
+p {
+  font-family: Inter; /* use font */
+   /* font-size: x-large; */
+    -webkit-user-select: none; /* Safari */
+            user-select: none; 
+}
+
+h1 {
+  font-family: Malington;
+    -webkit-user-select: none; /* Safari */
+            user-select: none;
+}
+h2 {
+  font-family: Malington;
+    -webkit-user-select: none; /* Safari */
+            user-select: none; 
+}
+h3 {
+  font-family: Malington;
+    -webkit-user-select: none; /* Safari */
+            user-select: none;
+}

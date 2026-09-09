@@ -1,0 +1,1258 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Exp 1 - Bagage search</title>
+    <!-- Get all the required jsPsych content -->
+    <script src="https://unpkg.com/jspsych@8.2.2"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-html-button-response@2.1.0"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-image-button-response@2.1.0"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-image-slider-response@2.1.0"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-instructions@2.1.0"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-preload@2.1.0"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-image-keyboard-response@2.1.0"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@2.1.0"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-call-function@2.1.0"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-canvas-keyboard-response@1.1.3"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-canvas-button-response@2.1.0"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-browser-check@2.1.0"></script>
+
+
+    <script src="https://code.jquery.com/jquery-4.0.0.min.js"></script>
+    
+    <script src="fabric.js"></script> 
+    <!-- https://fabric5.fabricjs.com/fabric-intro-part-1#objects  -->
+    <link href="https://unpkg.com/jspsych@8.2.2/css/jspsych.css" rel="stylesheet" type="text/css" />  
+    <link href="lerenkijken_style_exp5.css" rel="stylesheet" />  
+
+
+  </head>
+  <body oncontextmenu='return false;'></body>
+  <script>
+
+/*
+    blue
+    Rgb 45,0,200
+    Hex #2d00c8
+
+    yellow
+    Rgb 255,204,0
+    Hex #ffcc00
+
+    pink
+    Rgb 255,102,153
+    Hex #ff6699
+
+    orange
+    Rgb 254,153,0
+    Hex #fe9900
+
+    
+*/
+    //Initialize jsPsysch
+    const jsPsych = initJsPsych({
+        show_progress_bar: true,
+        message_progress_bar: 'Progress',
+        on_finish: function() {
+            jsPsych.data.displayData('json');
+           // window.location.href = 'https://lerenkijken.nl/';
+        }
+
+    });
+
+
+
+
+
+    let exp_version = '0_0_1'
+    const exp_id = 'exp_5_v'+exp_version
+    console.log("Exp id: ", exp_id)
+    
+    const url_vars = jsPsych.data.urlVariables()
+    
+    url_vars['exp_version'] = exp_version
+    url_vars['exp_id'] = exp_id
+
+    const exp_start_datetime = Date.now()
+    url_vars['exp_start_datetime'] = Date(exp_start_datetime)
+    url_vars['exp_start_UTCms'] = exp_start_datetime
+
+    const user_info_trial = {
+        type: jsPsychBrowserCheck,
+        data: url_vars,
+        // on_finish: resize_contents,
+    };
+
+    // theme colors
+    const theme_blue = '#2d00c8' 
+    const theme_blue_light = '#0084ff' 
+    const theme_yellow = '#ffcc00'
+    const theme_pink = '#ff6699' 
+    const theme_orange = '#fe9900' 
+
+    const main_img_dims = [1247, 696]  // aspect = 1.7916666666666667
+    const totaal_img_dims = [3838, 732] // aspect == 5.243169398907104
+    const ideal_canvas_aspect = 1.45
+
+    // exp / trial parameters
+    // 
+    const n_trials = 10
+
+
+    // set fabric object settings 
+    fabric.Object.prototype.selectable = false
+    fabric.Object.prototype.selectable = false
+    fabric.Object.prototype.hoverCursor ='auto'
+    fabric.Object.prototype.originX= 'center'
+    fabric.Object.prototype.originY= 'center'
+
+    // appearacnce parameters
+    const fabric_canvas_bg_col = 'rgb(30,30,30)'
+  
+    // get device info 
+    let get_device_info = () => jsPsych.data.get().filter({trial_type: "browser-check"})['trials'][0]
+
+    function get_window_size() {
+        let device_info = get_device_info()
+        let canvas_dim = Math.min( device_info.width, device_info.height)
+
+        return [device_info.width, device_info.height] 
+    }
+
+
+
+    // set content for mobile vs comp
+
+    function resize_contents () {
+        let jsPsych_contents = document.getElementsByClassName('jspsych-content');
+        if (window.innerHeight > 1.25 * window.innerWidth) {
+            for (let i =0; i< jsPsych_contents.length; i++) {
+                jsPsych_contents[i].style.width = '90%'
+                jsPsych_contents[i].style.fontSize = 'x-large'
+
+            }
+        }
+    }
+
+    function get_canvas_size() {
+        // aspect = width  / height    
+        // width  = aspect * height 
+        // height = width  / aspect
+        let device_info = get_device_info()
+        let device_window_aspect = device_info.width/device_info.height
+        let w, h;
+        if ( device_window_aspect > ideal_canvas_aspect) { // if wide screen
+            h = 0.6 * device_info.height
+            w = h * ideal_canvas_aspect
+
+        } else { // if tall screen
+            w = 0.8 * device_info.width
+            h = w / ideal_canvas_aspect
+        }
+        
+        return [h, w] 
+    }
+
+    // get list of img paths and make fabric objects
+    const flat_img_files = [];
+    const bridge_events = {};
+
+
+    for (let i=1; i <= 24; i++){
+        let event_views = {}
+        for (let view of ['Links', 'Midden', 'Rechts', 'Totaal']){
+
+            let img_path = 'imgs/main_imgs/' + (i<10? '0':'') + i + ' ' + view + '.png' 
+            if (i != 15){
+                flat_img_files.push(img_path)
+
+                const img = new Image();
+                img.src = img_path
+
+                const fabric_img = new fabric.Image(img, {
+                    left: 0,
+                    top: 0,
+                    width: (view == 'Totaal' ? totaal_img_dims[0] : main_img_dims[0]),
+                    height: (view == 'Totaal' ? totaal_img_dims[1] : main_img_dims[1]),
+                    image_label:  img_path.split('/')[2]
+                });
+                event_views[view] = fabric_img
+            }
+        }
+        bridge_events[(i<10? '0':'') + i] = event_views
+    }
+
+
+    // feedback labels
+    let n_hits, n_false_alarms, n_misses, n_correct_rejections, mean_rt
+
+    // make fabric objects of the stimuli
+    let danger_button_style = "background-color:#fe9900"
+    function make_trial(event_id) {
+
+        let loc_indicator, report_x, report_y
+        let view_sequence = []
+        let report_sequence = []
+        let current_view;
+
+
+        let fabric_trial = {
+            type: jsPsychCanvasButtonResponse,
+            canvas_size: get_canvas_size,
+            choices: ['<h2>&nbsp;&nbsp;Brug openen&nbsp;&nbsp;</h2>',
+                      '<h2>&nbsp;&nbsp;Ingrijpen&nbsp;&nbsp;</h2>',
+            ],
+            button_html: function(choice, choice_index) {            
+                if (choice_index == 0) {
+                    return `<button id="save-button" class="jspsych-btn-save">${choice}</button>`
+                } else {
+                    return `<button id="danger-button" class="jspsych-btn-danger">${choice}</button>`
+                };
+            },
+            // post_response_delay: entry_exit_duration,
+            // enable_button_after: pre_cue_duration,
+            stimulus: function (c) {
+                
+                let save_button_el = document.getElementById("save-button")
+                let danger_button_el = document.getElementById("danger-button")
+
+                //intitially disable the buttons
+                save_button_el.setAttribute("disabled", "disabled");
+                danger_button_el.setAttribute("disabled", "disabled");
+                
+
+
+                // initialize canvas and timestamp
+                trial_start_time = performance.now()
+                let canvas = new fabric.Canvas("jspsych-canvas-stimulus", {backgroundColor:fabric_canvas_bg_col, selection:false, centeredScaling:true});
+                let canvas_el = document.getElementById("jspsych-canvas-stimulus");
+
+                let canvas_rect = () => {return canvas_el.getBoundingClientRect()};
+
+                let canvas_diag = (canvas_rect().width**2 + canvas_rect().height**2)**0.5
+
+                // place total image at the top of canvas
+                let tot_img = bridge_events[event_id]['Totaal']
+                let tot_img_scale_w = canvas_rect().width / tot_img.width
+                let tot_img_scale_h = (0.2*canvas_rect().height)/ tot_img.height
+                let tot_img_scale = Math.min(tot_img_scale_w, tot_img_scale_h)
+                
+                tot_img.set({
+                    top: tot_img_scale * tot_img.height/2 ,
+                    left:  canvas_rect().width/2,
+                })
+                tot_img.scale(tot_img_scale)
+                canvas.add(tot_img)   
+
+
+
+                // place viewing image below the total image
+                let view_img, view_img_scale_w, view_img_scale_h, view_img_scale
+                function set_view_img(view_label) {
+                    view_img =  bridge_events[event_id][view_label]
+                    view_img_scale_w = canvas_rect().width / view_img.width
+                    view_img_scale_h = (0.8*canvas_rect().height ) / view_img.height
+                    view_img_scale = Math.min(view_img_scale_h, view_img_scale_w)
+                    
+                    view_img.set({
+                        top: tot_img_scale * tot_img.height + view_img_scale * view_img.height/2,
+                        left: canvas_rect().width/2,
+                    })
+                    view_img.scale(view_img_scale)
+                    canvas.add(view_img)
+
+
+                    // reset view indicator
+                    view_indicator.width = 0.97 * tot_img.width*tot_img_scale / 3
+                    if (view_label == "Links"){
+                        view_indicator.left = canvas_rect().width/2 - (tot_img_scale * (tot_img.width/3) )
+                    } 
+                    if (view_label == "Midden"){
+                        view_indicator.left = canvas_rect().width/2 
+                    } 
+                    if (view_label == "Rechts"){
+                        view_indicator.left = canvas_rect().width/2 + (tot_img_scale * (tot_img.width/3))
+                    }
+                    
+                    view_indicator.setCoords()
+                    canvas.remove(view_indicator)
+                    canvas.add(view_indicator)
+                    
+
+
+                    // record view change
+                    view_sequence.push({
+                        view:view_label,
+                        time_since_trial_start: performance.now()-trial_start_time
+                    })
+
+                    // set current view
+                    current_view = view_label
+
+
+                    // enable save button and disable danger button
+                    save_button_el.removeAttribute("disabled");
+                    danger_button_el.setAttribute("disabled", "disabled");
+                }
+                
+                // add location indicator
+                loc_indicator = new fabric.Circle({
+                    radius: canvas_diag*0.024 , fill: 'rgba(0,0,0,0)', stroke:'rgba(255,0,0,0.65)', strokeWidth:canvas_diag*0.012,
+                });
+                loc_indicator.set({
+                    left:0.1*canvas_rect().height , 
+                    top: 0.1*canvas_rect().height})
+                loc_indicator.setCoords()
+                canvas.add(loc_indicator)
+
+                // create view indicator
+                view_indicator = new fabric.Rect({
+                    width: 0.99 * tot_img.width*tot_img_scale, 
+                    height: 0.95 * tot_img.height*tot_img_scale, 
+                    fill: 'rgba(0,0,0,0)', stroke:theme_blue_light, strokeWidth: canvas_diag*0.006,
+                });
+                view_indicator.set({
+                    left:0.5*canvas_rect().width , 
+                    top: 0.1*canvas_rect().height})
+                view_indicator.setCoords()
+
+                canvas.add(view_indicator)
+                           
+
+
+                // handle location reports and view changes
+                
+                canvas.on(
+                    'mouse:down', 
+                    function(options) {
+                        canvas.remove(loc_indicator)
+                        canvas.add(loc_indicator)
+
+
+                        // handle either touchscreen taps and mouse clicks
+                        if (''+options.e == '[object MouseEvent]') { 
+                                report_x = Math.round(options.e.clientX - canvas_rect().x)
+                                report_y = Math.round(options.e.clientY - canvas_rect().y)
+                            } else if (''+options.e == '[object TouchEvent]'){
+                                let touch = options.e.touches.item(0)
+                                report_x = Math.round(touch.clientX - canvas_rect().x)
+                                report_y = Math.round(touch.clientY - canvas_rect().y)
+                            }
+                        
+                        // move indicator to indicated location
+                        if ((report_y > 0.2*canvas_rect().height) && current_view) {
+
+                            //disable save button and enable danger button
+                            save_button_el.setAttribute("disabled", "disabled");
+                            danger_button_el.removeAttribute("disabled");
+
+                            loc_indicator.animate('left', report_x, {
+                                onChange: canvas.renderAll.bind(canvas),
+                                duration: 150,
+                                easing: fabric.util.ease.easeOutQuad              
+                            })
+                            loc_indicator.animate('top', report_y, {
+                                onChange: canvas.renderAll.bind(canvas),
+                                duration: 150,
+                                easing: fabric.util.ease.easeOutQuad              
+                            })
+                            
+                            // compute normalized location on image itself: ie topleft = (0,0);   bottomright=(1,1);  center=(0.5,0.5)
+                            vw = view_img.width * view_img_scale
+                            vh = view_img.height * view_img_scale
+                            vx = view_img.left
+                            vy = view_img.top
+
+                            let report_x_norm = p5map(report_x, vx - vw/2, vx + vw/2, 0, 1)
+                            let report_y_norm = p5map(report_y, vy - vh/2, vy + vh/2, 0, 1) 
+
+                            console.log('report_x_norm', report_x_norm)
+                            console.log('report_y_norm', report_y_norm)
+
+                            // record location indication sequence
+                            report_sequence.push({
+                                report_loc: [report_x,report_y],
+                                report_loc_norm: [report_x_norm, report_y_norm],
+                                on_view: current_view,
+                                event_id: event_id,
+                                time_since_trial_start: performance.now() - trial_start_time
+                            })
+
+                        }  
+                        
+                        // (re)set image to view
+                        if (report_y <= 0.2*canvas_rect().height) { 
+                            if (report_x <  canvas_rect().width/2 - (tot_img_scale * tot_img.width / 3 / 2)   ) {  // indicate left
+                                if( current_view != "Links") {set_view_img("Links")}
+                                
+                            } else if (report_x <  canvas_rect().width/2 + (tot_img_scale * tot_img.width / 3 / 2) ) { 
+                                if( current_view != "Midden") {set_view_img("Midden")}
+
+                            } else  { // indicate Right
+                                if( current_view != "Rechts") {set_view_img("Rechts")}
+
+                            }
+
+
+                            // reset loc inicator to original position
+                            loc_indicator.animate('left', 0.1*canvas_rect().height, {
+                                onChange: canvas.renderAll.bind(canvas),
+                                duration: 150,
+                                easing: fabric.util.ease.easeOutQuad              
+                            })
+                            loc_indicator.animate('top', 0.1*canvas_rect().height, {
+                                onChange: canvas.renderAll.bind(canvas),
+                                duration: 150,
+                                easing: fabric.util.ease.easeOutQuad              
+                            }) 
+                            canvas.remove(loc_indicator)
+                            canvas.add(loc_indicator)                           
+
+                        }
+                        
+
+                    }
+                )
+                   
+                canvas.renderAll()
+
+            },
+
+            on_finish: function (data){
+                data.report_x = report_x
+                data.report_y = report_y
+                data.view_sequence = view_sequence
+                data.report_sequence = report_sequence
+            }
+        
+        }
+        return fabric_trial
+
+    }
+
+
+    /*
+    // function make_trial(n_targets, cue_validity = 'no_cue', extra_data={}) {
+    //     let loc_indicator
+    //     let loc_indicator_report_values;
+    //     let location_cue_label = ''
+    //     let trial_start_time, rt
+    //     let target_x, target_y
+    //     let report_x, report_y
+    //     let sig_det_label = n_targets == 0 ? 'correct rejection' : 'miss'; // default to absent response
+    //     let resp_dist_px, resp_dist_norm;
+
+    //     // add all_objects variables
+    //     let all_objects, all_objects_grouped, all_objects_grouped_init_x, all_objects_grouped_init_y
+    //     let target_object, hitpoint
+    //     let hitbox = new fabric.Rect({width:0, height:0, top:-9999, left:-9999})
+    //     let response_label;
+    
+    //     let object_info = {}
+
+    //     let fabric_trial = {
+    //         type: jsPsychCanvasButtonResponse,
+    //         canvas_size: get_canvas_size,
+    //         choices: ['<h2>&nbsp;&nbsp;Veilig&nbsp;&nbsp;</h2>'],
+    //         post_response_delay: entry_exit_duration,
+    //         enable_button_after: pre_cue_duration,
+    //         stimulus: function (c, buttonGroupElement) {
+                
+    //             // select targets and nontargets 
+    //             let selected_non_targets = jsPsych.randomization.sampleWithoutReplacement(non_target_items, n_objects-n_targets)
+    //             let selected_targets = jsPsych.randomization.sampleWithoutReplacement(target_items, n_targets)
+ 
+    //             let shuffled_selection = jsPsych.randomization.shuffle([...selected_non_targets, ...selected_targets])
+
+    //             // initialize canvas and timestamp
+    //             trial_start_time = performance.now()
+    //             let canvas = new fabric.Canvas("jspsych-canvas-stimulus", {backgroundColor:fabric_canvas_bg_col, selection:false, centeredScaling:true});
+    //             let canvas_el = document.getElementById("jspsych-canvas-stimulus");
+
+    //             let canvas_rect = () => {return canvas_el.getBoundingClientRect()};
+    //             let canvas_diag = (canvas_rect().width**2 + canvas_rect().height**2)**0.5
+
+
+    //             // add briefcase 
+
+    //             var briefcase_body  = new fabric.Rect({
+    //                 // left:0, top:0, 
+    //                 width:1600, height:900,
+    //                 // rx: 30, ry: 30, // round the corners
+    //                 strokeWidth:30,
+    //                 fill:briefcase_color, 
+    //                 stroke:briefcase_border_color,
+    //             });
+
+
+    //             let briefcase_handle = new fabric.Ellipse({
+    //                 left:0, top:-450,
+    //                 rx: briefcase_body.width*0.2,
+    //                 ry: briefcase_body.width*0.05,
+    //                 strokeWidth:briefcase_body.width*0.03,
+    //                 stroke: briefcase_border_color,
+    //                 fill:'rgba(0,0,0,0)'
+    //             })
+
+    //             let briefcase = new fabric.Group([briefcase_handle, briefcase_body], {   
+    //                 left: canvas_rect().width*0.5, top: canvas_rect().height*0.5,
+    //             })
+                
+
+    //             let briefcase_scale;
+
+                
+
+
+
+    //             // if lanscape orientation, scale based on width of canvas, otherwise scale based on height. 
+    //             // This way the briefcase fits on the screen regardless of orientation 
+    //             if ( (canvas_rect().height / canvas_rect().width)  >  (briefcase.height / briefcase.width) ){
+    //                 briefcase_scale = 0.95 * canvas_rect().width / briefcase.width 
+    //             } else { // if portrait scale accordingly
+    //                 briefcase_scale = 0.95 * canvas_rect().height / briefcase.height 
+    //             }
+
+    //             if (canvas_rect().width < canvas_rect().height){
+    //                 briefcase.rotate(90)
+                    
+    //                 if ( (canvas_rect().height / canvas_rect().width) >  (briefcase.width / briefcase.height) ){  // flip direction of comparison
+    //                     briefcase_scale = 0.95 * canvas_rect().width / briefcase.height 
+    //                 } else {
+    //                     briefcase_scale = 0.95 * canvas_rect().height / briefcase.width 
+    //                 }                                 
+    //             } 
+                
+                
+
+    //             briefcase.scale(briefcase_scale)               
+                
+
+    //             function get_briefcase_body_rect() {
+    //                 let rect_properties
+    //                 let handle_offset = briefcase_handle.ry + briefcase_handle.strokeWidth*0.5
+    //                 if (canvas_rect().width > canvas_rect().height){
+    //                     rect_properties =  {
+    //                         left:briefcase.left, 
+    //                         top: briefcase.top + handle_offset * briefcase_scale * 0.5 , 
+    //                         width:briefcase.width*briefcase_scale, 
+    //                         height: (briefcase.height - handle_offset) * briefcase_scale , 
+    //                         }
+    //                 } else {
+    //                     rect_properties =  {
+    //                         left:   briefcase.left - handle_offset * briefcase_scale * 0.5, 
+    //                         top:    briefcase.top, 
+    //                         height: briefcase.width * briefcase_scale, 
+    //                         width:  (briefcase.height - handle_offset) * briefcase_scale , 
+    //                     }
+    //                 }
+    //                 return rect_properties
+    //             }               
+
+    //            let briefcase_diag = (get_briefcase_body_rect().width**2 + get_briefcase_body_rect().height**2)**0.5 
+
+    //             // add a pointer indicator
+    //             loc_indicator = new fabric.Circle({
+    //                 radius: briefcase_diag*0.03 , fill: 'red', opacity:0.7, 
+    //             });
+
+    //             loc_indicator.set({left:-9999, top:-9999})
+              
+    //             function get_briefcase_objects() {
+    //                 let _briefcase_objects = []
+    //                 let added_object_locations = []
+    //                 // add a bunch of objects in  the briefcase 
+    //                 for (let obj of shuffled_selection){ 
+    //                     let obj_is_target = obj.img_label.includes('gun') || obj.img_label.includes('knife')
+    //                     let half_diag = 0.5 * (obj.width**2 + obj.height**2)**0.5  
+    //                     // format color of objects
+    //                     let rand_color = get_rand_from_array(item_color_options)
+    //                     obj.forEachObject(obj_el => {
+    //                         obj_el.fill=rand_color ; 
+    //                         obj_el.stroke=rand_color ; 
+    //                         obj_el.strokeWidth=half_diag*0.035 ;                             
+    //                     });
+    //                     obj.opacity=0.85
+
+    //                     // handle scaling of objects to make them uniform in size
+                        
+    //                     let required_half_diag = obj_briefcase_ratio * briefcase_diag  
+    //                     let obj_scale = required_half_diag / half_diag 
+    //                     obj.scale(obj_scale)// obj.scaleY = obj_scale // obj.scaleX = obj_scale
+                                                
+    //                     // set to random rotation/orientation
+    //                     obj.angle = Math.round(Math.random()*360)
+
+    //                     let half_diag_scaled = half_diag * obj_scale *1.2
+    //                     obj.half_diag_scaled = half_diag_scaled
+
+    //                     let bcr = get_briefcase_body_rect()
+
+                        
+    //                     let locations_tried = 0
+    //                     function min_dist_ensured(new_loc, old_locs, min_dist=half_diag_scaled){
+    //                         // return true if there are no old locs yet or if more than 1000 locs are tried
+    //                         if (old_locs.length < 1 || locations_tried>1500) {return true}
+
+    //                         // if any old loc is too close return false
+    //                         for (let [x1,y1] of old_locs){
+    //                             let computed_dist = get_dist(x1, y1, new_loc[0], new_loc[1])
+    //                             if ( computed_dist < required_half_diag*2.3) { return false}
+    //                         }
+
+    //                         // otherwise all good
+    //                         return true                        
+    //                     }
+    //                     // set object location ensuring no clumping
+    //                     do {
+            
+    //                         obj.left = get_rand_int( bcr.left - (bcr.width*0.5 - half_diag_scaled) ,    bcr.left + (bcr.width*0.5 - half_diag_scaled) )
+    //                         obj.top  = get_rand_int( bcr.top -  (bcr.height*0.5 - half_diag_scaled),    bcr.top  + (bcr.height*0.5 - half_diag_scaled) )
+            
+    //                         locations_tried++ 
+    //                     } while ( ! min_dist_ensured([obj.left, obj.top], added_object_locations)  )  // add a negation: while NOT mininum distance esured, look for another place
+
+    //                     added_object_locations.push([obj.left, obj.top])
+
+    //                     if ( obj_is_target ) {
+    //                         target_object = obj
+    //                         target_x = obj.left
+    //                         target_y = obj.top
+
+
+    //                         hitbox = new fabric.Rect({
+    //                             width: obj.width*obj_scale * (obj.img_label.includes('knife') ? 1.5 : 1.3), 
+    //                             height: obj.height*obj_scale*1.3, 
+    //                             angle:obj.angle,
+    //                             fill: 'rgb(0,0,0,0)', stroke:'red', strokeWidth:briefcase_diag*0.006, 
+    //                             top:obj.top, left:obj.left,
+    //                         });
+                            
+
+    //                     }
+
+    //                     object_info[obj.img_label] = {x:obj.left, y:obj.top, angle:obj.angle, color:obj.item(0).fill}
+    //                     _briefcase_objects.push(obj)
+    //                 } 
+
+    //                 return _briefcase_objects
+    //             }
+    //             let briefcase_objects = get_briefcase_objects()
+                
+
+
+
+    //             // add area cue
+    //             let location_cue_obj = new fabric.Rect();
+    //             let cue_x, cue_y
+    //             let bcr = get_briefcase_body_rect()
+
+    //             let cue_options = ['top-left', 'top-right', 'bottom-left', 'bottom-right']
+
+    //             // if no target, cue is random, if target present, cue is valid or invalid based on condition
+    //             if (n_targets == 0){
+    //                 location_cue_label = get_rand_from_array(cue_options)
+    //             } else {
+    //                 // determine target quadrant
+    //                 let target_quadrant = (target_y < bcr.top)? 'top-' : 'bottom-' 
+    //                 target_quadrant += (target_x < bcr.left)? 'left' : 'right'
+    //                 if (cue_validity == 'valid'){
+    //                     // set label given the target quadrant in the briefcase
+    //                     location_cue_label = target_quadrant
+    //                 }
+    //                 else if (cue_validity == 'invalid'){
+    //                     // select a random cue that is not the target quadrant
+    //                     location_cue_label = get_rand_from_array(cue_options.filter(opt => opt != target_quadrant) )
+    //                 }
+
+    //             }
+
+    //             // set the cue location 
+    //             cue_y = location_cue_label.includes('top')  ? bcr.top - bcr.height*0.25 : bcr.top + bcr.height*0.25
+    //             cue_x = location_cue_label.includes('left') ? bcr.left - bcr.width*0.25 : bcr.left + bcr.width*0.25
+
+                
+    //             location_cue_obj.set({
+    //                 left:cue_x, top:cue_y,                        
+    //                 strokeWidth: briefcase_diag * 0.03, 
+    //                 rx: 20, ry: 20, // round the corners
+    //                 stroke: theme_yellow,
+    //                 fill: theme_yellow+'50' //'rgba(0,0,0,0)' 
+    //             });
+                
+    //             // leave space betwee the cue and edge
+    //             location_cue_obj.width = bcr.width * 0.6  // - location_cue_obj.strokeWidth*2
+    //             location_cue_obj.height = bcr.height* 0.6 //  - location_cue_obj.strokeWidth*2                    
+                
+                
+                
+    //             briefcase.clone((o)=>{ pre_cue_icon = o  }       )
+    //             // pre_cue_icon.forEachObject(obj_el => {obj_el.fill=briefcase_color, obj_el})  
+    //             let full_cue_group;
+    //             // if no cue, do not add the cue objct, otherwise add it to the pre-cue icon group
+    //             if (cue_validity == 'no_cue'){
+    //                 full_cue_group = new fabric.Group([pre_cue_icon])
+    //             } else {
+    //                 full_cue_group = new fabric.Group([pre_cue_icon, location_cue_obj])
+    //             }            
+                
+    //             full_cue_group.scale(briefcase_scale*cue_scaling_factor)
+
+    //             full_cue_group.animate('opacity', 1, {
+    //                     from:0.2,
+    //                     onChange: canvas.renderAll.bind(canvas),
+    //                     duration: pre_cue_duration,
+    //                     easing: fabric.util.ease.easeOutExpo
+    //                 });
+                
+
+
+
+
+
+    //             let move_prop, move_val
+    //             function remove_briefcase_animation (safety_indicator) {
+    //                 // exit animation 
+
+    //                 // if (safety_indicator.img_label == 'save.svg') {
+    //                 //     // move_prop = 'left'
+    //                 //     // move_val =  canvas_rect().width
+    //                 // } else {
+    //                 //     move_prop = 'left'
+    //                 //     move_val = - canvas_rect().height
+    //                 // }
+
+    //                 let min_resp_dist_norm = 10
+    //                 if (n_targets) { // if there is a target
+
+    //                     canvas.add(hitbox)
+    //                     move_prop = 'left'
+    //                     move_val =  canvas_rect().width
+                        
+    //                     // if ( response_label== 'got_target') { // if target is found
+    //                     //     // move to the RIGHT!
+    //                     //     move_prop = 'left'
+    //                     //     move_val =  canvas_rect().width
+
+    //                     // } else if ( response_label== 'missed_target') { // if target is present but "save is pressed"
+    //                     //     // move DOWN!
+    //                     //     move_prop = 'top'
+    //                     //     move_val = canvas_rect().height
+    //                     // }  else {      // if non-target is selected            
+    //                     //     // move to the LEFT!
+    //                     //     move_prop = 'left'
+    //                     //     move_val = - canvas_rect().width
+    //                     // }
+
+    //                 } else {// if there is NO target
+    //                         move_prop = 'left'
+    //                         move_val = - canvas_rect().width
+
+
+    //                     // if ('save_indicated' ) { // if "save is pressed"
+    //                     //     // move UP!
+    //                     //     move_prop = 'top'
+    //                     //     move_val = -canvas_rect().height
+    //                     // }  else {    // if non-target is selected      
+    //                     //     // move to the LEFT!
+    //                     //     move_prop = 'left'
+    //                     //     move_val = - canvas_rect().width
+    //                     // }
+                        
+    //                 }
+                    
+    //                 // && (resp_dist_norm <= min_resp_dist_norm) ) { // if correctly pointed to target
+    //                 //     move_prop = 'left'
+    //                 //     move_val =  canvas_rect().width
+    //                 // }
+
+    //                 // if (n_targets && (resp_dist_norm > min_resp_dist_norm)   ) { // if target is there but 
+    //                 //     move_prop = 'left'
+    //                 //     move_val =  canvas_rect().width
+    //                 // }
+
+
+    //                 loc_indicator.animate(move_prop, move_val, {
+    //                     onChange: canvas.renderAll.bind(canvas),
+    //                     duration: entry_exit_duration,
+    //                     easing: fabric.util.ease.easeInExpo
+    //                 });
+    //                 safety_indicator.animate(move_prop, move_val, {
+    //                     onChange: canvas.renderAll.bind(canvas),
+    //                     duration: entry_exit_duration,
+    //                     easing: fabric.util.ease.easeInExpo
+    //                 });
+    //                 all_objects_grouped.animate(move_prop, move_val, {
+    //                     onChange: canvas.renderAll.bind(canvas),
+    //                     duration: entry_exit_duration,
+    //                     easing: fabric.util.ease.easeInExpo
+    //                 });
+
+    //                 hitbox.animate(move_prop, move_val, {
+    //                     onChange: canvas.renderAll.bind(canvas),
+    //                     duration: entry_exit_duration,
+    //                     easing: fabric.util.ease.easeInExpo
+    //                 });
+    //             }
+
+    //             jsPsych.pluginAPI.setTimeout(()=> {  // only enable response when briefcase in in view.
+    //                 canvas.on('mouse:down', function(options) {
+    //                         // remove previous 
+    //                         canvas.remove(loc_indicator)
+
+    //                         // update loc for mouse and for touchscreen devices
+                            
+    //                         if (''+options.e == '[object MouseEvent]') { 
+    //                             report_x = Math.round(options.e.clientX - canvas_rect().x)
+    //                             report_y = Math.round(options.e.clientY - canvas_rect().y)
+    //                         } else if (''+options.e == '[object TouchEvent]'){
+    //                             let touch = options.e.touches.item(0)
+    //                             report_x = Math.round(touch.clientX - canvas_rect().x)
+    //                             report_y = Math.round(touch.clientY - canvas_rect().y)
+    //                         }                                
+
+    //                         // add it back to the canvas
+    //                         loc_indicator.set({left:report_x, top: report_y}),
+    //                         loc_indicator_report_values = {x:report_x, y:report_y }
+
+    //                         //
+    //                         hitpoint = new fabric.Point(report_x, report_y)
+    //                         if (hitbox.containsPoint(hitpoint)) {  
+    //                             // target found and clicked!
+    //                             loc_indicator.fill= 'lime'  
+    //                             response_label= 'got_target'
+    //                         } else {
+    //                             // non-target / empty spot clicked
+    //                             loc_indicator.fill= 'rgba(0,0,0,0)'
+    //                             loc_indicator.stroke = 'red'
+    //                             loc_indicator.strokeDashArray =  [briefcase_diag*0.012,briefcase_diag*0.008]
+    //                             loc_indicator.strokeWidth = briefcase_diag*0.015
+    //                             loc_indicator.radius *= 1.4
+
+    //                             response_label= 'got_nontarget'
+
+    //                         }
+
+    //                         canvas.add(loc_indicator)
+                                    
+                            
+
+    //                         //end trial and save data 
+    //                         rt = Math.round(performance.now() - trial_start_time - pre_cue_duration - entry_exit_duration)
+    //                         sig_det_label = n_targets == 1 ? 'hit' : 'false alarm' // update to present response
+    //                         resp_dist_px = get_dist(report_x, report_y, target_x, target_y) 
+    //                         resp_dist_norm = 100 * resp_dist_px / briefcase_diag  // relative to canvas size, so comparable across devices
+    //                         jsPsych.pluginAPI.setTimeout(()=>{ jsPsych.finishTrial()}, entry_exit_duration )
+
+
+
+                            
+    //                         remove_briefcase_animation(danger_icon)
+                            
+    //                         canvas.renderAll()                        
+    //                 });
+                     
+                    
+    //                 // handle 'save'
+    //                 for (const button of buttonGroupElement.children) {
+    //                         button.addEventListener("click", () =>{
+
+    //                             response_label = n_targets == 0 ? 'save_indicated' : 'missed_target'
+    //                             // add safe icon
+    //                             let half_diag = 0.5 * (save_icon.width**2 + save_icon.height**2)**0.5  
+    //                             let required_half_diag = obj_briefcase_ratio * briefcase_diag  
+    //                             let obj_scale = required_half_diag / half_diag 
+    //                             save_icon.scale(obj_scale*1.75)
+    //                             save_icon.set({left:canvas_rect().width*0.3, top: canvas_rect().height*0.25, angle:-10}),
+    //                             save_icon.forEachObject(obj_el => {obj_el.strokeWidth=briefcase_diag*0.007; obj_el.stroke='lime';obj_el.fill='lime'})
+                                
+    //                           // add danger icon
+    //                             half_diag = 0.5 * (danger_icon.width**2 + danger_icon.height**2)**0.5  
+    //                             required_half_diag = obj_briefcase_ratio * briefcase_diag  
+    //                             obj_scale = required_half_diag / half_diag 
+    //                             danger_icon.scale(obj_scale*1.75)
+    //                             danger_icon.set({left:canvas_rect().width*0.7, top: canvas_rect().height*0.25, angle:10}),
+    //                             danger_icon.forEachObject(obj_el => {obj_el.strokeWidth=briefcase_diag*0.003; obj_el.stroke= 'red';obj_el.fill= 'red'})
+    //                             //canvas.add(danger_icon)
+    //                             // give feedback on report correctness
+    //                             if (n_targets == 0){
+    //                               canvas.add(save_icon) 
+    //                               remove_briefcase_animation(save_icon)
+    //                             } else {
+    //                               canvas.add(danger_icon) 
+    //                               remove_briefcase_animation(danger_icon)
+  
+    //                             }
+                                
+    //                         }  );
+    //                 } 
+
+    //             }, pre_cue_duration + entry_exit_duration)
+                
+                
+    //             // put stuff on canvas and render
+
+    //             canvas.add(full_cue_group)
+                
+    //             canvas.renderAll()
+
+
+    //             // wait a bit before 
+    //             jsPsych.pluginAPI.setTimeout(()=> {
+    //                 // canvas.remove(full_cue_group)
+    //                 canvas.add(briefcase)
+    //                 canvas.add(...briefcase_objects)
+                    
+                    
+                    
+
+    //                 // entrance animation
+    //                 all_objects = canvas.getObjects()
+    //                 all_objects_grouped = new fabric.Group(all_objects)
+    //                 all_objects_grouped_init_x = all_objects_grouped.left
+    //                 all_objects_grouped_init_y = all_objects_grouped.top
+
+    //                 all_objects_grouped.animate('top', all_objects_grouped_init_y, {
+    //                     from: all_objects_grouped_init_y - canvas_rect().height,
+    //                     onChange: canvas.renderAll.bind(canvas),
+    //                     duration: entry_exit_duration,
+    //                     easing: fabric.util.ease.easeOutExpo
+    //                 }); 
+
+    //             }, pre_cue_duration)
+      
+
+
+    //         },      
+            
+
+    //         on_finish:(data) => {
+
+                
+
+    //             data.label = 'search_trial' 
+    //             data.reported_loc_on_canvas = loc_indicator_report_values
+    //             data.n_targets = n_targets
+    //             data.cued_area = location_cue_label
+    //             data.rt = rt ? rt : Math.round(performance.now() - trial_start_time - pre_cue_duration - entry_exit_duration)
+    //             data.sig_det_label = sig_det_label
+    //             data.resp_dist_px = resp_dist_px
+    //             data.response_label = response_label
+    //             data.resp_dist_norm = resp_dist_norm
+    //             data.pre_cue_duration = pre_cue_duration
+    //             data.pre_cue_duration = entry_exit_duration
+    //             data.cue_validity = cue_validity
+    //             data.object_info = object_info
+                
+    //             // override any default data with extra data if provided
+    //             for (let key of Object.keys(extra_data)){
+    //                 data[key] = extra_data[key]
+    //             }
+
+    //             jsPsych.pluginAPI.clearAllTimeouts()
+    //         }
+    //     } 
+
+    //     return fabric_trial
+    //     }
+
+    
+    
+    
+    // build trial sequence:
+*/
+    const intro = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: `<h1>Welkom!</h1>` +
+        "<p>Je gaat zo een brug op afstand bedienen!</p>",
+        choices: ["Verder!"],
+        data:{
+            label:'intro',
+        }
+    };
+
+    const inter_trial = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: `<h1>Klaar voor de volgende?</h1>` ,
+        choices: ["Verder!"],
+        data:{
+            label:'inter_trial',
+        }
+    };
+
+
+    // const example_of_weapons = {
+    //     type: jsPsychHtmlButtonResponse,
+    //     stimulus: ()=> `<p>Hier zie je een voorbeeld van een<br><strong>mes en pistool</strong></p>`+
+    //         `<p><img src='gun_knife_example.png' maxWidth='400px' width='90%'></img></p>`+
+    //         "<p>Als je er één in een koffer ziet, tik/klik er dan meteen op! "+        
+    //         "Als je <strong>GEEN</strong> mes of pistool ziet geef je aan dat de koffer 'Veilig' is!</p>",
+    //     choices:() =>  between_pp_validity[0]=='no_cue' ? ["Oefen!"] : ['Verder'] ,
+    // }
+
+
+   
+    
+    // const pre_cue_instruction = {
+    //     type: jsPsychHtmlButtonResponse,
+    //     stimulus: () => {
+    //        let pre_cue_example_rotation = get_device_info().mobile ?  `transform:rotate(90deg); margin-top:0.8em` : ''
+            
+    //        return `<p>Een collega heeft elke koffer al vlug bekeken, en in geel 'verdachte plekken' gemarkeerd.</p>`+
+    //         `<p><img src='pre_cue_example.png' style="max-width:130px; width:50%; ${pre_cue_example_rotation}"></img></p>`+
+    //         `<p>Vóór elke koffer zie je kort een mini koffertje zoals hierboven, met de tip van je collega.`
+    //     } ,
+    //     choices: ["Oefen!"],
+    // }
+
+    // const pre_cue_instruction_if_node = {
+    //     timeline: [pre_cue_instruction],
+    //     conditional_function: () =>  between_pp_validity[0] == 'valid'
+    // }
+
+    // const pre_practice_trial = {
+    //     timeline: [example_of_weapons, pre_cue_instruction_if_node]
+    // }
+
+
+    // // make this loop function work!
+    // let redo_practice;
+    // const post_practice_trial = {
+    //     type: jsPsychHtmlButtonResponse,
+    //     stimulus: () => {
+    //         let got_target = jsPsych.data.get().last().values()[0].response_label == 'got_target' 
+
+    //         if (got_target) {
+    //             redo_practice = false
+    //             return "<p>Goed gevonden!</p><p>Jij snapt nu hoe het werkt!</p>"
+
+    //         } else {
+    //             redo_practice = true
+    //             return "<p>Er zat een wapen in de vorige koffer!<br>Die heb je niet gevonden.</p><p>Probeer het nog eens!</p>"
+    //         }
+            
+
+    //     },
+    //     choices: ["Verder!"],
+    // }
+
+    // let make_practice_procedure = () => { return {
+    //     timeline:  [make_trial(1, practice_validity, {label:'practice_search_trial'}), post_practice_trial],
+    //     loop_function: () => redo_practice
+    //     }
+    // }
+
+    // const pre_experimental_trials = {
+    //     type: jsPsychHtmlButtonResponse,
+    //     stimulus: `<h2>Nu ben je er klaar voor!</h2>`+
+    //              "<p>Waar wacht je op? Doorzoek de koffers!</p>",
+    //     choices: ["Start!"],
+    // }
+
+    const pause_trial = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: `<h1>Even pauze?</h1>` +
+        "<p>Je bent halverwege! Hoe vind je het gaan tot nu toe?</p>"+
+        "<p>Je kan door als je er weer klaar voor bent.</p>",
+        choices: ["Verder!"],
+        data:{
+            label:'pause',
+        }
+    };
+
+    const debrief = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: () =>{return `<h1>Dat was 'm!</h1>` +
+        "<p>Je hebt alle beelden gecontroleerd!</p>" +
+        `Je hebt ${n_targets_found} van de ${n_hits+n_misses} gevaarlijke situaties gespot!<br>` +
+        `Je zocht ongeveer ${(mean_rt/1000).toFixed(1)} seconden per keer.<br>`
+        }  ,
+        grid_rows:2,
+        choices: ["Probeer het nog eens!", "Doe een ander Experiment"] ,
+        data:{
+            label:'debrief',
+        },
+        on_finish: function(){
+            let resp_idx = jsPsych.data.get().last().select('response').values[0]
+            if (resp_idx == 0){
+                window.top.location.href = 'https://lerenkijken.nl/experiment/doorzoek-de-bagage'
+            }
+            if (resp_idx == 1){
+                window.top.location.href = 'https://lerenkijken.nl/#experimenten'; // fix url that stays on exp. maybe iframe issue??
+            }
+        },
+    };
+
+
+    // get summary data
+    let summary_data = null 
+    try {
+        window.xhr = $.post('https://www.lerenkijken.nl/api/get_summary', {'exp_id': exp_id}).done(function(res){
+        if(xhr.status == 200){
+            // console.log('OK!');
+            summary_data = res 
+            } else{
+                console.log(xhr.status);
+                summary_data = '  retrieval of summary datas did not return 200  '
+            }
+        }).fail(function(){
+            console.log(xhr.status);
+            summary_data = '  retrieval of summary data failed  '
+        });
+    } catch (error){
+        console.error(error);
+    }   
+
+    const save_data = {
+        type: jsPsychCallFunction,
+        async: true,
+        func: function(done){
+            try {
+                window.xhr = $.post('https://www.lerenkijken.nl/api/save', jsPsych.data.get().json()).done(function(){
+                    if(xhr.status == 200){
+                        console.log('data saved OK!');
+                        done()
+                    } else{
+                        console.log(xhr.status);
+                        console.log('not saved, xhr.status was not 200');
+                        done()
+                    }
+                }).fail(function(){
+                    console.log(xhr.status);
+                    console.log('not saved, fail function ran');
+                    done()
+                });
+            } catch (error){
+                console.log(error);
+                console.log('not saved, error caught');
+                done()
+            }
+        },
+        
+        on_start: function(){
+            // write summary data to the first object
+            let summary_object = {}   
+            let search_trials = jsPsych.data.get().filter({label: 'main_trial'})
+
+            // n_hits               = search_trials.filter({sig_det_label:'hit'}).count()
+            // n_false_alarms       = search_trials.filter({sig_det_label:'false_alarm'}).count()
+            // n_misses             = search_trials.filter({sig_det_label:'miss'}).count()
+            // n_correct_rejections = search_trials.filter({sig_det_label:'correct rejection'}).count()
+            // n_targets_found = search_trials.filter({response_label:'got_target'}).count()
+
+            mean_rt              = search_trials.select('rt').mean()
+
+            // summary_object.mean_rt = mean_rt
+            // summary_object.hit_rate = n_hits / (n_hits + n_misses)
+
+            // summary_object.false_alarm_rate = n_false_alarms / (n_false_alarms + n_correct_rejections)
+            // summary_object.between_pp_validity = between_pp_validity
+
+            jsPsych.data.get().first(1).values()[0]['user_summary_info'] = summary_object
+        },
+    }
+
+    const preload = {
+        type: jsPsychPreload,
+        images: flat_img_files,
+    }
+
+
+
+    // make timeline
+
+
+    // // get between pp condition
+    // let between_pp_validity = get_rand_from_array([
+    //     ['valid',  'valid',   'valid',   'invalid'], // 75% valid cues when target present
+    //     ['valid',  'invalid', 'invalid', 'invalid'], // 25% valid cues when target present
+    //     ['no_cue', 'no_cue',  'no_cue',  'no_cue']
+    // ])
+   
+    // // make a full factorial design with n_targets and cue_validity as factors, and 4 repetitions per condition
+    // // and already in randomized order
+    // let factors = {
+    //     cue_validity: between_pp_validity,
+    //     n_targets: [0, 1],
+    // }
+
+    // let full_design = jsPsych.randomization.factorial(factors, n_repeats_of_full_factorial_design);
+
+    // // if no cues in the experiment, also no cues in practice, otherwise  valid
+    // let practice_validity = between_pp_validity[0] == 'no_cue' ? 'no_cue' : 'valid'     
+
+        // Make timeline!
+
+    let timeline = [user_info_trial,  
+    make_trial('03'),
+    inter_trial,
+     make_trial('01'),
+     inter_trial,
+     make_trial('13'),
+    inter_trial,
+     make_trial('18'),
+       debrief
+
+
+]
+
+    // for (let i=0; i < n_search_trials ; i++ ) {
+    //     timeline.push(blank_trial, make_trial( full_design[i].n_targets , full_design[i].cue_validity) ) // full_design[i].n_targets
+
+    //     // add a pause trial in the middle of the experiment
+    //     if (i == Math.floor(n_search_trials/2) ) {
+    //         timeline.push( pause_trial )
+    //     }
+
+    // }
+    
+    // timeline.push(save_data)
+    // timeline.push(debrief)
+
+
+
+    
+   
+    jsPsych.run(timeline);   
+
+
+
+    // extra utility functions
+    function get_rand_rgb_str(){
+        return `rgb(${Math.round(Math.random()*255)}, ${Math.round(Math.random()*255)}, ${Math.round(Math.random()*255)})`
+    }
+
+    function get_rand_int(min, max) { 
+        // get radom integer value between min max, both inclusive
+        min = Math.ceil(min);
+        max = Math.floor(max);
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+    
+    function get_rand_from_array(array) {
+        let i = get_rand_int(0, array.length - 1)
+        return array[i]
+    }
+    
+    function get_rand_float(min, max) {
+        return Math.random() * (max - min) + min;
+    }
+
+    function get_dist(x1, y1, x2, y2) {
+        return ( (x2-x1)**2 + (y2-y1)**2 )**0.5
+    }
+    
+    function clamp(val, min, max) {
+        if (min > max ) {throw new Error("Min value is larger than max value.")}
+        return Math.min( max,  Math.max( val, min) )
+    }
+
+    function p5map(n, start1, stop1, start2, stop2) {
+        return ((n-start1)/(stop1-start1))*(stop2-start2)+start2;
+    };
+    
+  </script>
+</html>
+
+
+
