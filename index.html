@@ -163,21 +163,21 @@
         for (let view of ['Links', 'Midden', 'Rechts', 'Totaal']){
 
             let img_path = 'imgs/main_imgs/' + (i<10? '0':'') + i + ' ' + view + '.png' 
-            if (i != 15){
-                flat_img_files.push(img_path)
+            
+            flat_img_files.push(img_path)
 
-                const img = new Image();
-                img.src = img_path
+            const img = new Image();
+            img.src = img_path
 
-                const fabric_img = new fabric.Image(img, {
-                    left: 0,
-                    top: 0,
-                    width: (view == 'Totaal' ? totaal_img_dims[0] : main_img_dims[0]),
-                    height: (view == 'Totaal' ? totaal_img_dims[1] : main_img_dims[1]),
-                    image_label:  img_path.split('/')[2]
-                });
-                event_views[view] = fabric_img
-            }
+            const fabric_img = new fabric.Image(img, {
+                left: 0,
+                top: 0,
+                width: (view == 'Totaal' ? totaal_img_dims[0] : main_img_dims[0]),
+                height: (view == 'Totaal' ? totaal_img_dims[1] : main_img_dims[1]),
+                image_label:  img_path.split('/')[2]
+            });
+            event_views[view] = fabric_img
+            
         }
         bridge_events[(i<10? '0':'') + i] = event_views
     }
