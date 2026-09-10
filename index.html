@@ -146,7 +146,7 @@
             w = h * ideal_canvas_aspect
 
         } else { // if tall screen
-            w = 0.8 * device_info.width
+            w = 0.95 * device_info.width
             h = w / ideal_canvas_aspect
         }
         
@@ -288,11 +288,6 @@
 
                     // set current view
                     current_view = view_label
-
-
-                    // enable save button and disable danger button
-                    save_button_el.removeAttribute("disabled");
-                    danger_button_el.setAttribute("disabled", "disabled");
                 }
                 
                 // add location indicator
@@ -304,6 +299,19 @@
                     top: 0.1*canvas_rect().height})
                 loc_indicator.setCoords()
                 canvas.add(loc_indicator)
+
+                // add loc indicator placeholder
+                loc_indicator_placeholder = new fabric.Circle({
+                    radius:loc_indicator.radius*1.6 , 
+                    fill: 'rgba(0,0,0,0)', stroke: 'rgba(255,0,0,0.65)', // "#0084ff99"
+                    strokeWidth:canvas_diag*0.0015, 
+                });
+                loc_indicator_placeholder.set({
+                    left:0.1*canvas_rect().height , 
+                    top: 0.1*canvas_rect().height})
+                loc_indicator_placeholder.setCoords()
+                canvas.add(loc_indicator_placeholder)
+
 
                 // create view indicator
                 view_indicator = new fabric.Rect({
@@ -381,20 +389,27 @@
                         }  
                         
                         // (re)set image to view
-                        if (report_y <= 0.2*canvas_rect().height) { 
-                            if (report_x <  canvas_rect().width/2 - (tot_img_scale * tot_img.width / 3 / 2)   ) {  // indicate left
-                                if( current_view != "Links") {set_view_img("Links")}
-                                
-                            } else if (report_x <  canvas_rect().width/2 + (tot_img_scale * tot_img.width / 3 / 2) ) { 
+                        let tot_img_edge_0 = canvas_rect().width/2 - (tot_img_scale * tot_img.width / 2)
+                        let tot_img_edge_1 = canvas_rect().width/2 - (tot_img_scale * tot_img.width / 3 / 2)
+                        let tot_img_edge_2 = canvas_rect().width/2 + (tot_img_scale * tot_img.width / 3 / 2)
+                        let tot_img_edge_3 = canvas_rect().width/2 + (tot_img_scale * tot_img.width / 2)
+
+                        if (report_y <= 0.2*canvas_rect().height) { // if in the indicator zone
+
+                            if ( (report_x > tot_img_edge_0) && (report_x <= tot_img_edge_1) ) {  // indicate Left
+                                if( current_view != "Links") {set_view_img("Links")}                                
+                            }
+
+                            if ( (report_x > tot_img_edge_1) && (report_x <= tot_img_edge_2) ) {  // indicate Middle
                                 if( current_view != "Midden") {set_view_img("Midden")}
-
-                            } else  { // indicate Right
+                            } 
+                            
+                            if ( (report_x > tot_img_edge_2) && (report_x <= tot_img_edge_3) ) { // indicate Right
                                 if( current_view != "Rechts") {set_view_img("Rechts")}
-
                             }
 
 
-                            // reset loc inicator to original position
+                            // reset loc indicator to original position
                             loc_indicator.animate('left', 0.1*canvas_rect().height, {
                                 onChange: canvas.renderAll.bind(canvas),
                                 duration: 150,
@@ -406,7 +421,12 @@
                                 easing: fabric.util.ease.easeOutQuad              
                             }) 
                             canvas.remove(loc_indicator)
-                            canvas.add(loc_indicator)                           
+                            canvas.add(loc_indicator)   
+                            
+                            
+                            // enable save button and disable danger button
+                            save_button_el.removeAttribute("disabled");
+                            danger_button_el.setAttribute("disabled", "disabled");
 
                         }
                         
