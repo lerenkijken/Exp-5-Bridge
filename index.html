@@ -70,7 +70,7 @@
     const exp_conditions = ['systematic', 'free']
     const search_condition = jsPsych.randomization.sampleWithoutReplacement(exp_conditions, 1)[0]
 
-    let exp_version = '0_0_3'
+    let exp_version = '0_0_4'
     const exp_id = 'exp_5_v'+exp_version
     console.log("Exp id: ", exp_id)
     
@@ -105,11 +105,11 @@
     const ideal_canvas_aspect = 1.45
 
     // exp / trial parameters
-    // Given current stimulus material: max 13 danger trials;  max 11 save trials;  
+    // Given current stimulus material: max 13 danger trials;  max 11 safe trials;  
     const n_danger_trials = testing_mode ? 2 :  10  // 2 trials if testing else 10
-    const n_save_trials = testing_mode ? 2 :  10
+    const n_safe_trials = testing_mode ? 2 :  10
 
-    const n_trials = n_danger_trials + n_save_trials
+    const n_trials = n_danger_trials + n_safe_trials
 
 
 
@@ -171,8 +171,11 @@
     // get list of img paths and make fabric objects
     const flat_img_files = [];
     const bridge_events = {};
-    const save_event_numbers = [] 
+    const safe_event_numbers = [] 
     const danger_event_numbers = []
+
+    const safe_practice_event_number = '14'
+    const danger_practice_event_number = '04'
 
     // event numbers 25 to 28 are instructions
     // 25 - red:    "Brug"            full search area     (free searching mode)
@@ -188,7 +191,7 @@
             if (i<=13){
                 danger_event_numbers.push(event_number)
             } else if (i<=24){
-                save_event_numbers.push(event_number)
+                safe_event_numbers.push(event_number)
             } 
             
             for (let view of ['Links', 'Midden', 'Rechts', 'Totaal']){
@@ -220,7 +223,7 @@
 
     // make fabric objects of the stimuli
     let danger_button_style = "background-color:#fe9900"
-    function make_trial(event_id) {
+    function make_trial(event_id, trial_label='main_trial') {
         
         let report_x, report_y;
         let current_view;
@@ -238,7 +241,7 @@
             ],
             button_html: function(choice, choice_index) {            
                 if (choice_index == 0) {
-                    return `<button id="save-button" class="jspsych-btn-save" >${choice}</button>`//style="width:${0.45*get_canvas_size()[1]}px; font-size:${0.01*get_canvas_size()[1]}px}"
+                    return `<button id="safe-button" class="jspsych-btn-safe" >${choice}</button>`//style="width:${0.45*get_canvas_size()[1]}px; font-size:${0.01*get_canvas_size()[1]}px}"
                 } else {
                     return `<button id="danger-button" class="jspsych-btn-danger" >${choice}</button>` // style="width:${0.45*get_canvas_size()[1]}px"
                 };
@@ -248,11 +251,11 @@
             // enable_button_after: pre_cue_duration,
             stimulus: function (c) {
                 
-                let save_button_el = document.getElementById("save-button")
+                let safe_button_el = document.getElementById("safe-button")
                 let danger_button_el = document.getElementById("danger-button")
 
                 //intitially disable the buttons
-                save_button_el.setAttribute("disabled", "disabled");
+                safe_button_el.setAttribute("disabled", "disabled");
                 danger_button_el.setAttribute("disabled", "disabled");
                 
 
@@ -401,8 +404,8 @@
                             // push it onto the end of the array 
                             loc_indicators_array.push(loc_indicator) // take the first loc indicator of out of array and handle it
 
-                            //disable save button and enable danger button
-                            save_button_el.setAttribute("disabled", "disabled");
+                            //disable safe button and enable danger button
+                            safe_button_el.setAttribute("disabled", "disabled");
                             danger_button_el.removeAttribute("disabled");
 
                             // loc_indicator.set({left:report_x, top:report_y})
@@ -497,8 +500,8 @@
                                 canvas.add(loc_indicator)   
                             }
                             
-                            // enable save button and disable danger button
-                            save_button_el.removeAttribute("disabled");
+                            // enable safe button and disable danger button
+                            safe_button_el.removeAttribute("disabled");
                             danger_button_el.setAttribute("disabled", "disabled");
 
                         }
@@ -512,11 +515,12 @@
             },
 
             on_finish: function (data){
-                data.label = 'main_trial'
+                data.label = trial_label
                 data.report_x = report_x
                 data.report_y = report_y
                 data.view_sequence = view_sequence
                 data.report_sequence = report_sequence
+                data.bridge_report = (data.response == 0) ? "safe" : "danger" 
 
                 data.end_state_indicators = []
                 for (let loc_indicator of loc_indicators_array){
@@ -526,7 +530,6 @@
                         report_y_norm: loc_indicator.report_y_norm,
                     })
                 }
-
             }
         
         }
@@ -813,16 +816,7 @@
                             if ( (report_x > tot_img_edge_2) && (report_x <= tot_img_edge_3) ) { // indicate Right
                                 if( current_view != "Rechts") {set_view_img("Rechts")}
                             }
-
-                            // if ( (report_x < tot_img_edge_0) || (report_x > tot_img_edge_3) ) { // Pure reset of indicators
-                            //     report_sequence.push({
-                            //         view: current_view,
-                            //         event_id: event_id,
-                            //         time_since_trial_start: performance.now() - trial_start_time,
-                            //         label: 'reset indicators'
-                            //     })
-                            //     console.log(report_sequence)
-                            // }                            
+                
 
                             // reset all loc indicators to original position
                             for (let loc_indicator of loc_indicators_array) {
@@ -1033,6 +1027,114 @@
         on_finish:()=>{console.log('preloading done')}
     }
 
+    const miss_try_again = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: `<h1>Je opende de burg, maar hebt een gevaarlijke situatie gemist!</h1><h1>Probeer het nog eens!</h1>` ,
+        choices: ["<h2>Verder!</h2>"],
+        data:{
+            label:'miss_try_again',
+        }
+    };
+
+    const FA_try_again = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: `<h1>Je greep in, maar brug kon veilig open.</h1><h1>Probeer het nog eens!</h1>` ,
+        choices: ["<h2>Verder!</h2>"],
+        data:{
+            label:'FA_try_again',
+        }
+    };
+
+    const FA_try_again_cond = {
+        timeline: [FA_try_again],
+        conditional_function: function(){
+            let prev_response = jsPsych.data.get().last(2).values()[0].bridge_report 
+            
+            if (prev_response == 'danger') {
+                return false // false,  i.e. skip this trial
+            } else {
+                return true // truem, i.e. run this trial
+            }
+        }    
+
+    }
+
+
+    
+    const hit_continue = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: `<h1>Goed ingegrepen! De brug kon zo niet open.</h1><h1>Jij snap het!</h1>` ,
+        choices: ["<h2>Verder!</h2>"],
+        data:{
+            label:'hit_continue',
+        }
+    };
+
+    const CR_continue = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: `<h1>Goed gedaan! De brug kon inderdaad veilig open.</h1><h1>Jij snap het!</h1>` ,
+        choices: ["<h2>Verder!</h2>"],
+        data:{
+            label:'CR_continue',
+        }
+    };
+////
+    const danger_practice_loop = {
+        timeline: [miss_try_again, make_trial(danger_practice_event_number, 'practice_danger')],
+
+        loop_function: function(data) {
+
+            let prev_response = jsPsych.data.get().filter({label:'practice_danger'}).last(1).values()[0]['bridge_report']
+            
+            if (prev_response == 'danger') {
+                return false // false,  i.e. stop looping  
+            } else {
+                return true // truem, i.e. keep looping
+            }
+        }
+    } 
+
+    const conditionally_loop_danger_practice = {
+        timeline: [danger_practice_loop],
+        conditional_function: function(){
+            let prev_response = jsPsych.data.get().filter({label:'practice_danger'}).last(1).values()[0]['bridge_report']
+            
+            if (prev_response == 'danger') {
+                return false // false,  i.e. skip this trial
+            } else {
+                return true // true, i.e. run this trial
+            }
+        }    
+    }
+
+////
+    const safe_practice_loop = {
+        timeline: [FA_try_again, make_trial(safe_practice_event_number, 'practice_safe')],
+
+        loop_function: function(data) {
+
+            let prev_response = jsPsych.data.get().filter({label:'practice_safe'}).last(1).values()[0]['bridge_report']
+            
+            if (prev_response == 'safe') {
+                return false // false,  i.e. stop looping
+            } else {
+                return true // truem, i.e. keep looping
+            }
+        }
+    } 
+
+    const conditionally_loop_safe_practice = {
+        timeline: [safe_practice_loop],
+        conditional_function: function(){
+            let prev_response = jsPsych.data.get().filter({label:'practice_safe'}).last(1).values()[0]['bridge_report']
+            
+            if (prev_response == 'safe') {
+                return false // false,  i.e. skip this trial
+            } else {
+                return true // true, i.e. run this trial
+            }
+        }    
+    }
   
     // make timeline
     let timeline = [user_info_trial, 
@@ -1042,10 +1144,10 @@
 
 
     // Make timeline (this procedure is the same for systematic and free searchers)
-    let save_trials = jsPsych.randomization.sampleWithoutReplacement(save_event_numbers, n_save_trials)
+    let safe_trials = jsPsych.randomization.sampleWithoutReplacement(safe_event_numbers, n_safe_trials)
     let danger_trials = jsPsych.randomization.sampleWithoutReplacement(danger_event_numbers, n_danger_trials)
 
-    let shuffled_event_numbers = jsPsych.randomization.shuffle([...save_trials, ...danger_trials])
+    let shuffled_event_numbers = jsPsych.randomization.shuffle([...safe_trials, ...danger_trials])
 
     if (search_condition == 'free') {  // uninstructed search
         timeline.push(
@@ -1059,6 +1161,17 @@
             make_instruction_trial('28'),  // 25 is yellow
         )
     }
+
+    // add practice trials
+    timeline.push(
+        make_trial(safe_practice_event_number, 'practice_safe'),
+        conditionally_loop_safe_practice, 
+        CR_continue,
+
+        make_trial(danger_practice_event_number, 'practice_danger'),
+        conditionally_loop_danger_practice,
+        hit_continue,
+    )
 
     // add the main experimental trials and trial dividers
     for (let event_number of shuffled_event_numbers) {
@@ -1125,7 +1238,7 @@
 
 To do's:
 - Make intro sequence for each condition
-- click on each area to indicate order and confim seen 
+
 
 - 
 
@@ -1152,9 +1265,13 @@ Done:
 
 - randomize events (e.g. pick 10 of each, then shuffle order?)
   - 01-13 EVENT: something is wrong! -> Do not open bridge  (13 cases, so max 13 danger trials)  use '04' for pactice -> 12 available
-  - 14-24 NO event: everything okay! -> Save to open brifge (11 cases, so max 11 save trials)    use '14' for pactice -> 10 available   
+  - 14-24 NO event: everything okay! -> safe to open brifge (11 cases, so max 11 safe trials)    use '14' for pactice -> 10 available   
 
 - have 3 target indicators and recylce on the fourth click
+
+- click on each area to indicate order and confim seen 
+
+
 -->
 
 

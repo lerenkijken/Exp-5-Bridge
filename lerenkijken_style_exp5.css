@@ -61,8 +61,8 @@ html, body {
 }
 
 
-/* Save bridge button */
-.jspsych-btn-save {
+/* safe bridge button */
+.jspsych-btn-safe {
     font-size: large; 
     padding: 0.4em 1em;
     margin: 1em 1.3em;   
@@ -75,12 +75,12 @@ html, body {
             user-select: none; 
 
 }
-.jspsych-btn-save:hover {
+.jspsych-btn-safe:hover {
   background-color: #0084ff; 
   border-color: #0084ff;
   color: white;
 }
-.jspsych-btn-save:disabled {
+.jspsych-btn-safe:disabled {
   background-color: #0084ff3f;
   border-color:  #0084ff3f;
   cursor:not-allowed;
