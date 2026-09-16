@@ -9,7 +9,8 @@ html, body {
   /* font-size: 25px; */
   background-color: black;
   color: white;
- 
+  
+
 }
 
 .jspsych-content {
@@ -20,10 +21,26 @@ html, body {
   left: 50%; 
   transform: translateX(-50%);
 }
+
+.jspsych-content {
+  background-color: black;
+  color: white;
+  position: fixed;
+  
+  left: 50%; 
+  transform: translateX(-50%);
+}
+
+.canvas-container {
+  left: 50%; 
+  transform: translateX(-50%);
+}
+
+
 /* Generic button */
 .jspsych-btn {
     font-size: large; 
-    padding: 0.4em 0.9em;
+    padding: 0em 1em;
     border: 10px solid transparent;
     border-radius: 1em;
     color: white;
@@ -36,22 +53,19 @@ html, body {
 .jspsych-btn:hover {
   background-color: #2b00c8; 
   border-color: #2b00c8;
-  color: white;
-  margin: 0.5em     
 }
 .jspsych-btn:disabled {
-  background-color: #2b00c800;
-  color: #aaaaaa00;
-  border-color: #d13d3d00;
-  cursor:auto;
+  background-color: #0084ff3f;
+  border-color:  #0084ff3f;
+  cursor:not-allowed;
 }
 
 
 /* Save bridge button */
 .jspsych-btn-save {
     font-size: large; 
-    padding: 0.4em 1.5em;
-    margin: 1em 2em;   
+    padding: 0.4em 1em;
+    margin: 1em 1.3em;   
     border: 10px solid transparent;
     border-radius: 1em;
     color: white;
@@ -69,14 +83,14 @@ html, body {
 .jspsych-btn-save:disabled {
   background-color: #0084ff3f;
   border-color:  #0084ff3f;
-  cursor:auto;
+  cursor:not-allowed;
 }
 
 /*  Danger bridge button*/
 .jspsych-btn-danger {
     font-size: large; 
-    padding: 0.4em 1.5em;
-    margin: 1em 2em;   
+    padding: 0.4em 1em;
+    margin: 1em 1.3em;   
     border: 10px solid transparent;
     border-radius: 1em;
     color: white;
@@ -93,7 +107,7 @@ html, body {
 .jspsych-btn-danger:disabled {
   background-color: #d200003f;
   border-color:  #d200003f;
-  cursor:auto;
+  cursor:not-allowed;
 }
 
 
@@ -136,7 +150,9 @@ html, body {
 
 #jspsych-progressbar-container span {
     /* font-size: 20px; */
-    padding-right: 25px;
+    padding: 0px;
+    margin:0px;
+    
 }
 
 #jspsych-progressbar-outer {
@@ -172,7 +188,7 @@ html, body {
 
 p {
   font-family: Inter; /* use font */
-   /* font-size: x-large; */
+    font-size: large;
     -webkit-user-select: none; /* Safari */
             user-select: none; 
 }
