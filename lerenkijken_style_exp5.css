@@ -197,6 +197,7 @@ h1 {
   font-family: Malington;
     -webkit-user-select: none; /* Safari */
             user-select: none;
+            line-height: 1.5em;
 }
 h2 {
   font-family: Malington;
