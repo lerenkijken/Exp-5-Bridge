@@ -241,21 +241,15 @@
 
     const preload_imgs_with_call = {
         type: jsPsychCallFunction,
-        func: function(){
+        func: function() {
             let save_start_timestamp = performance.now()
             setTimeout(async () =>{
                 for (let event_number of  [safe_practice_event_number, danger_practice_event_number, ...shuffled_event_numbers] ){
-                    // 09 is removed (it was similar to 08)
                     let event_views = {}
                     
-                    if (event_number<=13){
-                        danger_event_numbers.push(event_number)
-                    } else if (event_number<=24){
-                        safe_event_numbers.push(event_number)
-                    } 
                     
                     for (let view of ['Links', 'Midden', 'Rechts', 'Totaal']){
-                        event_views[view] = await load_img_fabric (event_number  + ' ' + view)
+                        event_views[view] = await load_img_fabric(event_number  + ' ' + view)
                     }
                     bridge_events[event_number] = event_views
                     
