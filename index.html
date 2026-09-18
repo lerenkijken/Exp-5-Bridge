@@ -30,7 +30,8 @@
   </head>
   <body oncontextmenu='return false;'></body>
   <script>
-    async function full_exp_async_wrapper(){
+   async function full_script_async_wrapper(){
+
 /*
     blue
     Rgb 45,0,200
@@ -68,9 +69,9 @@
         document.body.style.backgroundImage = `url("bgimg.png")`
     }
     const exp_conditions = ['systematic', 'free']
-    const search_condition = jsPsych.randomization.sampleWithoutReplacement(exp_conditions, 1)[0]
+    const search_condition =jsPsych.randomization.sampleWithoutReplacement(exp_conditions, 1)[0]
 
-    let exp_version = '0_0_5'
+    let exp_version = '0_0_6'
     const exp_id = 'exp_5_v'+exp_version
     console.log("Exp id: ", exp_id)
     
@@ -121,7 +122,7 @@
     fabric.Object.prototype.originY= 'center'
 
     // appearacnce parameters
-    const fabric_canvas_bg_col = 'rgb(0,0,0)'
+    const fabric_canvas_bg_col = '#202020'
   
     // get device info 
     let get_device_info = () => jsPsych.data.get().filter({trial_type: "browser-check"})['trials'][0]
@@ -189,6 +190,7 @@
     // 27 - green:  "Fiets-voetpad"   bike and foot path   (systematic searching mode)
     // 28 - yellow: "Randen"          edges                (systematic searching mode)
 
+    const loaded_imgs = []
 
     async function load_img_fabric (img_name) {
         // let img_path = 'imgs/main_imgs/' + event_number  + ' ' + view + '.png' 
@@ -196,7 +198,10 @@
 
         const img = new Image();
         img.src = img_path
-        img.onload = ()=>{console.log('loaded: '+img_name )}
+        img.onload = ()=>{ 
+            loaded_imgs.push(img_name) 
+            console.log('loaded: '+img_name)
+        }
         await img.decode();
 
         
@@ -214,28 +219,6 @@
     }
     
 
-
-    function load_img_fabric_new (img_name) {
-        // let img_path = 'imgs/main_imgs/' + event_number  + ' ' + view + '.png' 
-        let img_path = 'imgs/main_imgs/' + img_name + '.png'
-
-        const img = new Image();
-        img.src = img_path
-
-        img.onload = ()=>{console.log('loaded: '+img_name )}
-        console.log( `${img_name} -  width: ${ img.width }, height: ${ img.height }` );
-        
-        const fabric_img = new fabric.Image(img, {
-            left: 0,
-            top: 0,
-            width: img_sizes_raw[img_name][0], // (view == 'Totaal' ? 781 : 730),  //
-            height: img_sizes_raw[img_name][1], // (view == 'Totaal' ? 150 : 400),
-            image_label:  img_name
-        });
-
-        return fabric_img
-    }
-
     //load the instruction imgs (based on condition) + practice images 
     let instruction_imgs;
     if (search_condition == 'free') {
@@ -244,7 +227,7 @@
         instruction_imgs = ['26', '27', '28']
     } 
 
-    for (let event_number of [...instruction_imgs, safe_practice_event_number, danger_practice_event_number]){
+    for (let event_number of instruction_imgs){
        
         let event_views = {}
         // let event_number = (i<10? '0':'') + i
@@ -261,7 +244,7 @@
         func: function(){
             let save_start_timestamp = performance.now()
             setTimeout(async () =>{
-                for (let event_number of shuffled_event_numbers ){
+                for (let event_number of  [safe_practice_event_number, danger_practice_event_number, ...shuffled_event_numbers] ){
                     // 09 is removed (it was similar to 08)
                     let event_views = {}
                     
@@ -1011,6 +994,33 @@
             }
         },
     };
+    
+    let interval_ID
+    function stall_exp_until_loaded(event_number) {
+        const stall_trial = {  
+            type: jsPsychCallFunction,
+            async: true,
+            func: function(done){   
+                interval_ID = setInterval(()=>{
+                    
+                    let all_imgs_loades = ( loaded_imgs.includes(event_number+' Totaal') &&
+                         loaded_imgs.includes(event_number+' Links')  &&
+                         loaded_imgs.includes(event_number+' Rechts') &&
+                         loaded_imgs.includes(event_number+' Rechts') 
+                        )
+                    if (all_imgs_loades) {
+                        done()
+                    } else {
+                        console.log('Stalling progresss!')
+                    }
+
+                    
+                }, 50) 
+            },
+            on_finish: ()=>{clearInterval(interval_ID)}
+        }
+        return stall_trial
+    }
 
 
     // get summary data
@@ -1206,7 +1216,6 @@
   
     // make timeline
     let timeline = [user_info_trial, preload_imgs_with_call, 
-
     intro]
 
 
@@ -1229,10 +1238,12 @@
 
     // add practice trials
     timeline.push(
+        stall_exp_until_loaded(safe_practice_event_number),
         make_trial(safe_practice_event_number, 'practice_safe'),
         conditionally_loop_safe_practice, 
         CR_continue,
 
+        stall_exp_until_loaded(danger_practice_event_number),
         make_trial(danger_practice_event_number, 'practice_danger'),
         conditionally_loop_danger_practice,
         hit_continue,
@@ -1244,6 +1255,7 @@
     for (let event_number of shuffled_event_numbers) {
         timeline.push(
 
+            stall_exp_until_loaded(event_number),
             make_trial(event_number),
             save_data_inter_trail, // save data after evert completed trial
             inter_trial,
@@ -1300,8 +1312,7 @@
 
 
 
-}
-full_exp_async_wrapper()
+}  full_script_async_wrapper()
   </script>
 </html>
 
