@@ -30,7 +30,7 @@
   </head>
   <body oncontextmenu='return false;'></body>
   <script>
-
+    async function full_exp_async_wrapper(){
 /*
     blue
     Rgb 45,0,200
@@ -70,7 +70,7 @@
     const exp_conditions = ['systematic', 'free']
     const search_condition = jsPsych.randomization.sampleWithoutReplacement(exp_conditions, 1)[0]
 
-    let exp_version = '0_0_4'
+    let exp_version = '0_0_5'
     const exp_id = 'exp_5_v'+exp_version
     console.log("Exp id: ", exp_id)
     
@@ -174,6 +174,11 @@
     const danger_event_numbers = ["01","02", "03","04", "06","07", "08","10", "11","12", "13",] // (length = 11)  /// 01-13 except 9 and 5
     const safe_event_numbers   = ["15","16", "17","18", "19","20", "21","22", "23","24"]       //  (length = 10)1  5-24
 
+    const safe_trials = jsPsych.randomization.sampleWithoutReplacement(safe_event_numbers, n_safe_trials)
+    const danger_trials = jsPsych.randomization.sampleWithoutReplacement(danger_event_numbers, n_danger_trials)
+
+    const shuffled_event_numbers = jsPsych.randomization.shuffle([...safe_trials, ...danger_trials])
+
     const danger_practice_event_number = '05'
     const safe_practice_event_number   = '14'
     const img_sizes_raw = {"01 Links": [732, 400],"01 Midden": [718, 400],"01 Rechts": [734, 400],"01 Totaal": [788, 150],"02 Links": [728, 400],"02 Midden": [716, 400],"02 Rechts": [729, 400],"02 Totaal": [783, 150],"03 Links": [727, 400],"03 Midden": [721, 400],"03 Rechts": [734, 400],"03 Totaal": [786, 150],"04 Links": [728, 400],"04 Midden": [720, 400],"04 Rechts": [733, 400],"04 Totaal": [779, 150],"05 Links": [735, 400],"05 Midden": [720, 400],"05 Rechts": [737, 400],"05 Totaal": [831, 150],"06 Links": [729, 400],"06 Midden": [718, 400],"06 Rechts": [735, 400],"06 Totaal": [780, 150],"07 Links": [725, 400],"07 Midden": [717, 400],"07 Rechts": [736, 400],"07 Totaal": [784, 150],"08 Links": [726, 400],"08 Midden": [719, 400],"08 Rechts": [731, 400],"08 Totaal": [778, 150],"10 Links": [728, 400],"10 Midden": [716, 400],"10 Rechts": [733, 400],"10 Totaal": [782, 150],"11 Links": [728, 400],"11 Midden": [719, 400],"11 Rechts": [733, 400],"11 Totaal": [779, 150],"12 Links": [727, 400],"12 Midden": [715, 400],"12 Rechts": [734, 400],"12 Totaal": [783, 150],"13 Links": [727, 400],"13 Midden": [718, 400],"13 Rechts": [734, 400],"13 Totaal": [782, 150],"14 Links": [728, 400],"14 Midden": [718, 400],"14 Rechts": [731, 400],"14 Totaal": [784, 150],"15 Links": [730, 400],"15 Midden": [716, 400],"15 Rechts": [729, 400],"15 Totaal": [778, 150],"16 Links": [735, 400],"16 Midden": [717, 400],"16 Rechts": [737, 400],"16 Totaal": [778, 150],"17 Links": [729, 400],"17 Midden": [717, 400],"17 Rechts": [729, 400],"17 Totaal": [783, 150],"18 Links": [729, 400],"18 Midden": [718, 400],"18 Rechts": [737, 400],"18 Totaal": [783, 150],"19 Links": [730, 400],"19 Midden": [718, 400],"19 Rechts": [733, 400],"19 Totaal": [780, 150],"20 Links": [730, 400],"20 Midden": [717, 400],"20 Rechts": [732, 400],"20 Totaal": [786, 150],"21 Links": [727, 400],"21 Midden": [718, 400],"21 Rechts": [733, 400],"21 Totaal": [781, 150],"22 Links": [733, 400],"22 Midden": [720, 400],"22 Rechts": [733, 400],"22 Totaal": [783, 150],"23 Links": [730, 400],"23 Midden": [716, 400],"23 Rechts": [735, 400],"23 Totaal": [785, 150],"24 Links": [731, 400],"24 Midden": [716, 400],"24 Rechts": [733, 400],"24 Totaal": [783, 150],"25 Links": [728, 400],"25 Midden": [715, 400],"25 Rechts": [731, 400],"25 Totaal": [784, 150],"26 Links": [727, 400],"26 Midden": [715, 400],"26 Rechts": [733, 400],"26 Totaal": [784, 150],"27 Links": [730, 400],"27 Midden": [715, 400],"27 Rechts": [731, 400],"27 Totaal": [784, 150],"28 Links": [731, 400],"28 Midden": [715, 400],"28 Rechts": [732, 400],"28 Totaal": [784, 150]}
@@ -183,20 +188,49 @@
     // 26 - blue:   "Rijbaan"         driving lane         (systematic searching mode)
     // 27 - green:  "Fiets-voetpad"   bike and foot path   (systematic searching mode)
     // 28 - yellow: "Randen"          edges                (systematic searching mode)
-    function load_img_fabric (img_name) {
+
+
+    async function load_img_fabric (img_name) {
         // let img_path = 'imgs/main_imgs/' + event_number  + ' ' + view + '.png' 
         let img_path = 'imgs/main_imgs/' + img_name + '.png'
 
         const img = new Image();
         img.src = img_path
         img.onload = ()=>{console.log('loaded: '+img_name )}
+        await img.decode();
+
+        
+        console.log( `${img_name} -  width: ${ img.width }, height: ${ img.height }` );
+        
+        const fabric_img =  new fabric.Image(img, {
+            left: 0,
+            top: 0,
+            width: img.width, //img_sizes_raw[img_name][0], // (view == 'Totaal' ? 781 : 730),  //
+            height: img.height, //img_sizes_raw[img_name][1], // (view == 'Totaal' ? 150 : 400),
+            image_label:  img_name
+        });
+
+        return fabric_img
+    }
+    
+
+
+    function load_img_fabric_new (img_name) {
+        // let img_path = 'imgs/main_imgs/' + event_number  + ' ' + view + '.png' 
+        let img_path = 'imgs/main_imgs/' + img_name + '.png'
+
+        const img = new Image();
+        img.src = img_path
+
+        img.onload = ()=>{console.log('loaded: '+img_name )}
+        console.log( `${img_name} -  width: ${ img.width }, height: ${ img.height }` );
         
         const fabric_img = new fabric.Image(img, {
             left: 0,
             top: 0,
             width: img_sizes_raw[img_name][0], // (view == 'Totaal' ? 781 : 730),  //
-            height:  img_sizes_raw[img_name][1], // (view == 'Totaal' ? 150 : 400),
-            image_label:  img_path.split('/')[2]
+            height: img_sizes_raw[img_name][1], // (view == 'Totaal' ? 150 : 400),
+            image_label:  img_name
         });
 
         return fabric_img
@@ -216,17 +250,18 @@
         // let event_number = (i<10? '0':'') + i
         
         for (let view of ['Links', 'Midden', 'Rechts', 'Totaal']){
-            event_views[view] = load_img_fabric (event_number  + ' ' + view)                
+            event_views[view] = await load_img_fabric (event_number  + ' ' + view)   
         }
         bridge_events[event_number] = event_views
     }
+
 
     const preload_imgs_with_call = {
         type: jsPsychCallFunction,
         func: function(){
             let save_start_timestamp = performance.now()
-            setTimeout(() =>{
-                for (let event_number of [...safe_event_numbers, ...danger_event_numbers] ){
+            setTimeout(async () =>{
+                for (let event_number of shuffled_event_numbers ){
                     // 09 is removed (it was similar to 08)
                     let event_views = {}
                     
@@ -237,7 +272,7 @@
                     } 
                     
                     for (let view of ['Links', 'Midden', 'Rechts', 'Totaal']){
-                        event_views[view] = load_img_fabric (event_number  + ' ' + view)                
+                        event_views[view] = await load_img_fabric (event_number  + ' ' + view)
                     }
                     bridge_events[event_number] = event_views
                     
@@ -1177,10 +1212,7 @@
 
 
     // Make timeline (this procedure is the same for systematic and free searchers)
-    let safe_trials = jsPsych.randomization.sampleWithoutReplacement(safe_event_numbers, n_safe_trials)
-    let danger_trials = jsPsych.randomization.sampleWithoutReplacement(danger_event_numbers, n_danger_trials)
 
-    let shuffled_event_numbers = jsPsych.randomization.shuffle([...safe_trials, ...danger_trials])
 
     if (search_condition == 'free') {  // uninstructed search
         timeline.push(
@@ -1265,6 +1297,11 @@
         return array.reduce((x, y) => x + y,  0);
     }
     
+
+
+
+}
+full_exp_async_wrapper()
   </script>
 </html>
 
