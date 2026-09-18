@@ -71,7 +71,7 @@
     const exp_conditions = ['systematic', 'free']
     const search_condition =jsPsych.randomization.sampleWithoutReplacement(exp_conditions, 1)[0]
 
-    let exp_version = '0_0_6'
+    let exp_version = '0_0_7'
     const exp_id = 'exp_5_v'+exp_version
     console.log("Exp id: ", exp_id)
     
@@ -1005,7 +1005,7 @@
                     
                     let all_imgs_loades = ( loaded_imgs.includes(event_number+' Totaal') &&
                          loaded_imgs.includes(event_number+' Links')  &&
-                         loaded_imgs.includes(event_number+' Rechts') &&
+                         loaded_imgs.includes(event_number+' Midden') &&
                          loaded_imgs.includes(event_number+' Rechts') 
                         )
                     if (all_imgs_loades) {
