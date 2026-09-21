@@ -8,7 +8,7 @@
     <script src="https://unpkg.com/@jspsych/plugin-html-button-response@2.1.0"></script>
     <script src="https://unpkg.com/@jspsych/plugin-image-button-response@2.1.0"></script>
     <script src="https://unpkg.com/@jspsych/plugin-image-slider-response@2.1.0"></script>
-    <script src="https://unpkg.com/@jspsych/plugin-instructions@2.1.0"></script>
+    <!-- <script src="https://unpkg.com/@jspsych/plugin-instructions@2.1.0"></script> -->
     <script src="https://unpkg.com/@jspsych/plugin-preload@2.1.0"></script>
     <script src="https://unpkg.com/@jspsych/plugin-image-keyboard-response@2.1.0"></script>
     <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@2.1.0"></script>
@@ -16,7 +16,7 @@
     <script src="https://unpkg.com/@jspsych/plugin-canvas-keyboard-response@1.1.3"></script>
     <script src="https://unpkg.com/@jspsych/plugin-canvas-button-response@2.1.0"></script>
     <script src="https://unpkg.com/@jspsych/plugin-browser-check@2.1.0"></script>
-
+    <script src="plugin-instructions.js"></script> 
 
     <script src="https://code.jquery.com/jquery-4.0.0.min.js"></script>
     
@@ -64,14 +64,14 @@
 
 
     // determine 
-    const testing_mode = true
+    const testing_mode = false
     if (testing_mode) {
         document.body.style.backgroundImage = `url("bgimg.png")`
     }
     const exp_conditions = ['systematic', 'free']
-    const search_condition =jsPsych.randomization.sampleWithoutReplacement(exp_conditions, 1)[0]
+    const search_condition = jsPsych.randomization.sampleWithoutReplacement(exp_conditions, 1)[0]
 
-    let exp_version = '0_0_7'
+    let exp_version = '0_0_8'
     const exp_id = 'exp_5_v'+exp_version
     console.log("Exp id: ", exp_id)
     
@@ -127,6 +127,14 @@
     // get device info 
     let get_device_info = () => jsPsych.data.get().filter({trial_type: "browser-check"})['trials'][0]
 
+    function interaction_type(captialize=false){
+        let s = get_device_info().moblie ? 'tik' : 'klik'
+        if (captialize) {
+            s = s[0].toUpperCase() + s.slice(1)
+        }
+        return s
+    }
+
     function get_window_size() {
         let device_info = get_device_info()
         let canvas_dim = Math.min( device_info.width, device_info.height)
@@ -166,7 +174,7 @@
             h = w / ideal_canvas_aspect
         }
         
-        return [h, w] 
+        return [h, w]  // note! returns height then width!!
     }
 
     // get list of img paths and make fabric objects
@@ -203,9 +211,6 @@
             console.log('loaded: '+img_name)
         }
         await img.decode();
-
-        
-        console.log( `${img_name} -  width: ${ img.width }, height: ${ img.height }` );
         
         const fabric_img =  new fabric.Image(img, {
             left: 0,
@@ -219,7 +224,13 @@
     }
     
 
-    //load the instruction imgs (based on condition) + practice images 
+    
+
+    //..................................
+    // LOADING IMAGES
+    //..................................
+
+    // load the instruction imgs (based on condition) + practice images 
     let instruction_imgs;
     if (search_condition == 'free') {
         instruction_imgs = ['25']
@@ -251,16 +262,12 @@
                     for (let view of ['Links', 'Midden', 'Rechts', 'Totaal']){
                         event_views[view] = await load_img_fabric(event_number  + ' ' + view)
                     }
-                    bridge_events[event_number] = event_views
-                    
+                    bridge_events[event_number] = event_views 
+                     
                 }
-
-            }, 0) // final line of setTimeout, have it begin immideatly 
+            },0) // final line of setTimeout, have it begin immideatly 
         },
-
     }
-
-
 
     // feedback labels
     let n_hits, n_false_alarms, n_misses, n_correct_rejections, mean_rt
@@ -276,7 +283,6 @@
         let report_sequence = [];
         let loc_indicators_array = [];
         
-
         let fabric_trial = {
             type: jsPsychCanvasButtonResponse,
             canvas_size: get_canvas_size,
@@ -290,7 +296,7 @@
                     return `<button id="danger-button" class="jspsych-btn-danger" >${choice}</button>` // style="width:${0.45*get_canvas_size()[1]}px"
                 };
             },
-            prompt: "<p style='padding:0em;margin:0.1em'>Bekijk de camerabeelden goed!<br>Open de brug als dat veilig kan, of wijs het gevaar aan en grijp in!</p>",
+            prompt: () => `<p style='padding:0em;margin:0.1em'>Bekijk de camerabeelden goed${((search_condition == 'free') ? '' : " volgens je <strong>KIJKPLAN</strong>")}!<br>Open de brug als dat veilig kan, of wijs al het gevaar aan en grijp in!</p>` ,
             // post_response_delay: entry_exit_duration,
             // enable_button_after: pre_cue_duration,
             stimulus: function (c) {
@@ -493,10 +499,6 @@
                             let report_x_norm = p5map(report_x, vx - vw/2, vx + vw/2, 0, 1)
                             let report_y_norm = p5map(report_y, vy - vh/2, vy + vh/2, 0, 1) 
 
-                                  
-
-                            console.log('report_x_norm', report_x_norm)
-                            console.log('report_y_norm', report_y_norm)
                             loc_indicator.report_x_norm = report_x_norm
                             loc_indicator.report_y_norm = report_y_norm
 
@@ -581,12 +583,20 @@
             },
 
             on_finish: function (data){
+
                 data.label = trial_label
                 data.report_x = report_x
                 data.report_y = report_y
                 data.view_sequence = view_sequence
                 data.report_sequence = report_sequence
                 data.bridge_report = (data.response == 0) ? "safe" : "danger" 
+
+                if (event_id <= 13){ // 1-13 is event / dangerous!
+                   data.sig_det_label = (data.bridge_report == 'danger') ? 'hit' : 'miss'                      // if reporting danger -> register hit else register miss
+                } 
+                if ( (event_id >= 14) && (event_id <= 24) ){ // 14-24 is no event / safe!
+                   data.sig_det_label = (data.bridge_report == 'danger') ? 'false_alarm' : 'correct_rejection' // if reporting danger -> register false_alarm else register correct_rejection
+                }
 
                 data.end_state_indicators = []
                 for (let loc_indicator of loc_indicators_array){
@@ -619,19 +629,34 @@
             type: jsPsychCanvasButtonResponse,
             canvas_size: get_canvas_size,
             choices: ['<h2>Verder</h2>'],
-            prompt: "<p style='padding:0em;margin:0.1em'>Open elk camerabeeld en plaats een vinkje in elk gekleurd gebied, om verder te gaan</p>",
+            prompt:() => {
+                if (search_condition == 'free') {
+                    return `<p style='padding:0em;margin:0.1em'>${interaction_type(true)} op een camerabeeld om het te openen. `+
+                           `${interaction_type(true)} op elk gekleurd gebied om te bevestigen dat je elk gebied hebt bekeken. Dan kun je verder!</p>` 
+                } else if (event_id == '28') {
+                    return `<p style='padding:0em;margin:0.1em'>${interaction_type(true)} eerst op het linker camerabeeld om die te openen en `+
+                           `${interaction_type()} op <strong>BEIDE</strong> gekleurde vlakken. Doe dan hetzeldfe bij het middelste beeld, en daarna bij het rechter beeld. Dan kun je verder! `
+                } else {
+                    return `<p style='padding:0em;margin:0.1em'>${interaction_type(true)} eerst op het linker camerabeeld om die te openen en `+
+                           `${interaction_type()} op het gekleurde vlak. Doe dan hetzeldfe bij het middelste beeld, en daarna bij het rechter beeld. Dan kun je verder! `
+                }
+            
+            },
+            
             button_html: function(choice, choice_index) {   
                 return `<button id="continue-button" class="jspsych-btn" >${choice}</button>`
             },
-
             stimulus: function (c) {
-                let reported_area_flags = [0, 0, 0, 0, 0, 0]
+                let reported_area_flags = {
+                    'Links': 0,
+                    'Midden': 0,
+                    'Rechts': 0,
+                }
                 let continue_button_el = document.getElementById("continue-button")
 
                 //intitially disable the continue button
                 continue_button_el.setAttribute("disabled", "disabled");
-                
-                
+                                
                 // initialize canvas and timestamp
                 trial_start_time = performance.now()
                 let canvas = new fabric.Canvas("jspsych-canvas-stimulus", {backgroundColor:fabric_canvas_bg_col, selection:false, centeredScaling:true});
@@ -835,30 +860,15 @@
                             })
 
                             // Check if all areas are indicated and enable continue button                        
-                            for (let rep of report_sequence) {
-
-                                if (event_id == '28') { // check if clicked twice on each view with yellow areas
-                                    if ((rep.view == "Links") && reported_area_flags[0] == 1 ) {reported_area_flags[3] = 1                                    
-                                    } else if (rep.view == "Links") {reported_area_flags[0] = 1 }
-
-                                    
-                                    if ((rep.view == "Midden") && reported_area_flags[1] == 1 ) {reported_area_flags[4] = 1                                    
-                                    } else if (rep.view == "Midden") {reported_area_flags[1] = 1}
-
-                                    if ((rep.view == "Rechts") && reported_area_flags[2] == 1 ) {reported_area_flags[5] = 1
-                                    } else if (rep.view == "Rechts") {reported_area_flags[2] = 1} 
-
-
-                                } else {// check if clicked once on each view                                
-                                    if (rep.view == "Links") {reported_area_flags[0] = 1}
-                                    if (rep.view == "Midden") {reported_area_flags[1] = 1}
-                                    if (rep.view == "Rechts") {reported_area_flags[2] = 1}         
-                                }
-                            }
-
+                            let checks_per_view = (event_id == '28') ? 2 : 1    // check if clicked twice on each view with yellow areas
+                            
+                            reported_area_flags[current_view] += 1
+                            reported_area_flags[current_view] = Math.min(checks_per_view, reported_area_flags[current_view])
+                            
                             // if enough areas checked enable the continue button 
-                            let required_reports = (event_id == '28') ? 6 : 3
-                            if (sum(reported_area_flags) == required_reports){
+                            let required_reports = 3 * checks_per_view
+                            
+                            if (sum_object_values(reported_area_flags) == required_reports){
                                 continue_button_el.removeAttribute("disabled")
                             }
 
@@ -934,15 +944,161 @@
     }
 
 
-    const intro = {
+    //...............................
+    // Info / intro trials
+    //...............................
+
+
+    // const intro_01 = {
+    //     type: jsPsychHtmlButtonResponse,
+    //     stimulus: () =>  (testing_mode?`<h1>TESTING MODE: ${exp_version}</h1>`:'')  + `<h1>Welkom!</h1>` +
+    //     "<p>Je mag de Haringvlietbrug op afstand bedienen!<br>Jij bepaalt of de brug veilig open kan voor de scheepvaart.</p>"+
+    //      `<img src="imgs/main_imgs/14 Rechts.png" style="width:${get_canvas_size()[1] *0.75}px" ></img>`,
+    //     choices: ["<h2>Verder!</h2>"],
+    //     data:{
+    //         label:'intro_01',
+    //     }
+    // };
+    
+    
+    // const intro_02 = {
+    //     type: jsPsychHtmlButtonResponse,
+    //     stimulus: () =>  `<img src="imgs/main_imgs/14 Totaal.png" style="width:${get_canvas_size()[1]}px"></img>`+
+    //     `<p>Je kan de brug via drie cameras bekijken zoals hierboven.</p>`+
+    //     `<p><strong>Er mag niets tussen de slagbomen staan.</strong><br>Dus geen voetgangers, fietsers, voertuigen, etc.</p>`+
+    //     `<p>Alleen dan mag de brug open.</p>`,
+    //     choices: ["<h2>Verder!</h2>"],
+    //     data:{
+    //         label:'intro_02',
+    //     }
+    // };
+    
+    // const intro_03 = {
+    //     type: jsPsychHtmlButtonResponse,
+    //     stimulus: () =>  `<img src="imgs/main_imgs/25 Totaal.png" style="width:${get_canvas_size()[1]}px"></img>`+
+    //     `<p>Het gebied tussen de slagbomen is hier rood gemarkeerd.</p>`+
+    //     `<p>In dit rode gebied mag dus niets staan.</p>`,
+    //     choices: ["<h2>Verder!</h2>"],
+    //     data:{
+    //         label:'intro_03',
+    //     }
+    // };
+
+    // const intro_04 = {
+    //     type: jsPsychHtmlButtonResponse,
+    //     stimulus: () =>  `<img src="imgs/main_imgs/25 Totaal.png" style="width:${get_canvas_size()[1]}px"></img>`+
+    //     `<p>Laten we even oefenen met de camerabeelden.</p>`,
+    //     choices: ["<h2>Verder!</h2>"],
+    //     data:{
+    //         label:'intro_04',
+    //     }
+    // };
+        
+    const intro_sequence = {
+        type: jsPsychInstructions,
+        pages:()=> { return [
+
+        //Page 1 html   
+         (testing_mode?`<h1>TESTING MODE: ${exp_version}</h1>`:'')  + `<h1>Welkom!</h1>` +
+        "<p>Je mag de Haringvlietbrug op afstand bedienen!<br>Jij bepaalt of de brug veilig open kan voor de scheepvaart.</p>"+
+         `<img src="imgs/main_imgs/14 Rechts.png" style="width:${get_canvas_size()[1] *0.75}px" ></img>` ,
+
+        //Page 2 html  
+        `<img src="imgs/main_imgs/14 Totaal.png" style="width:${get_canvas_size()[1]}px"></img>`+
+        `<p>Je kan de brug via drie cameras bekijken zoals hierboven.</p>`+
+        `<p><strong>Er mag niets tussen de slagbomen staan.</strong><br>Dus geen voetgangers, fietsers, voertuigen, etc.</p>`+
+        `<p>Alleen dan mag de brug open.</p>`,
+
+        //Page 3 html 
+        `<img src="imgs/main_imgs/25 Totaal.png" style="width:${get_canvas_size()[1]}px"></img>`+
+        `<p>Het gebied tussen de slagbomen is hier rood gemarkeerd.</p>`+
+        `<p>In dit rode gebied mag dus niets staan.</p>`,
+
+        //Page 4 html
+        `<img src="imgs/main_imgs/25 Totaal.png" style="width:${get_canvas_size()[1]}px"></img>`+
+        `<p>Laten we even oefenen met de camerabeelden.</p>`,
+        ]}
+        ,
+        button_label_next: "<h2>Verder ></h2>",
+        button_label_previous: "<h2>< Terug</h2>",
+        allow_backward:true,
+        show_clickable_nav: true,
+    }
+
+    // systematic viewing sequence 
+    const sys_view_01 = {
         type: jsPsychHtmlButtonResponse,
-        stimulus: (testing_mode?`<h1>TESTING MODE: ${exp_version}</h1>`:'')  + `<h1>Welkom!</h1>` +
-        "<p>Je gaat zo een brug op afstand bedienen!</p>",
+        stimulus: () =>  
+        `<img src="imgs/main_imgs/25 Totaal.png" style="width:${get_canvas_size()[1]}px"></img>`+
+        `<p>Om het rode vlak goed te bekijken, volg jij een<br><strong>GESTRUCTUREERD KIJKPLAN</strong>.<br>`+
+        `Het kijkplan verdeelt het rode vlak in drie delen (rijbaan, fiets-/voetpad, randen).<br>Je bekijkt deze vlakken één voor één.</p>`,
         choices: ["<h2>Verder!</h2>"],
         data:{
-            label:'intro',
-        }
-    };
+            label:'sys_view_01',
+        }        
+    }
+
+    const sys_view_02 = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: () =>  `<img src="imgs/main_imgs/26 Totaal.png" style="width:${get_canvas_size()[1]}px"></img>`+
+        `<p>Je begint met kijken naar de rijbaan (hier blauwe gemarkeerd).<br>Eerst links, dan midden, dan rechts.</p>`,
+        choices: ["<h2>Verder!</h2>"],
+        data:{
+            label:'sys_view_02',
+        }        
+    }
+    
+    const sys_view_03 = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: () =>  `<img src="imgs/main_imgs/27 Totaal.png" style="width:${get_canvas_size()[1]}px"></img>`+
+        `<p>Dan kijk je naar het fietspad en voetpad (hier groen gemarkeerd).<br>Eerst links, dan midden, dan rechts.</p>`,
+        choices: ["<h2>Verder!</h2>"],
+        data:{
+            label:'sys_view_03',
+        }        
+    }
+
+    const sys_view_04 = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: () =>  `<img src="imgs/main_imgs/28 Totaal.png" style="width:${get_canvas_size()[1]}px"></img>`+
+        `<p>Als laatste kijk je naar de randen (hier geel gemarkeerd).<br>Eerst links, dan midden, dan rechts.</p>`,
+        choices: ["<h2>Verder!</h2>"],
+        data:{
+            label:'sys_view_04',
+        }        
+    }
+    const sys_view_05 = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: () =>  `<h2>Goed bezig! Dat waren alle stappen!</h2>` +
+            `<p style="margin-bottom:0em"><br>Met het kijkplan bekijk je dus de beelden steeds van links naar rechts.<br>Eerst de rijbaan.</p>`+
+        `<img src="imgs/main_imgs/26 Totaal.png" style="width:${get_canvas_size()[1]*0.6}px"></img>`+
+            `<p style="margin-bottom:0em">Dan het voet-/fietspad.</p>`+
+        `<img src="imgs/main_imgs/27 Totaal.png" style="width:${get_canvas_size()[1]*0.6}px"></img>`+
+            `<p style="margin-bottom:0em">Dan de randen.</p>`+
+        `<img src="imgs/main_imgs/28 Totaal.png" style="width:${get_canvas_size()[1]*0.6}px"></img>`+
+        `<p style="margin-bottom:0em">Als je het kijkplan goed volgt, bekijk je elk camerabeeld dus drie keer voordat je de brug bedient.</p>`,
+        choices: ["<h2>Verder!</h2>"],
+        data:{
+            label:'sys_view_05',
+        }        
+    }
+
+    const sys_view_sequence = {
+        timeline:[sys_view_01, 
+                  sys_view_02, make_instruction_trial('26'), 
+                  sys_view_03, make_instruction_trial('27'), 
+                  sys_view_04, make_instruction_trial('28'),
+                  sys_view_05
+                ]
+    }
+
+
+    
+
+
+    //...............................
+    // Pause / intermediate trials
+    //...............................
 
     const inter_trial = {
         type: jsPsychHtmlButtonResponse,
@@ -970,8 +1126,9 @@
         type: jsPsychHtmlButtonResponse,
         stimulus: () =>{return `<h1>Dat was 'm!</h1>` +
         "<p>Je hebt alle beelden gecontroleerd!</p>" +
-        `Je hebt XXX van de XXX gevaarlijke situaties gespot!<br>` +
-        `Je zocht ongeveer XXX seconden per keer.<br>`
+        `Je greep in bij ${n_hits} van de ${n_danger_trials} gevaarlijke situaties!<br>` +
+        `En je hebt ${n_correct_rejections} van de ${n_safe_trials} bruggen veilig geopend!<br>` +
+        `Je bekeek elke brug ongeveer ${(mean_rt/1000).toFixed(1)} seconden.<br>`
         }  ,
         grid_rows:2,
         choices: ["Probeer het nog eens!", "Doe een ander Experiment"] ,
@@ -981,14 +1138,144 @@
         on_finish: function(){
             let resp_idx = jsPsych.data.get().last().select('response').values[0]
             if (resp_idx == 0){
-                window.top.location.href = 'https://lerenkijken.nl/#experimenten'
+                window.top.location.href = 'https://lerenkijken.nl/experiment/open-de-haringvlietbrug'
             }
             if (resp_idx == 1){
-                window.top.location.href = 'https://lerenkijken.nl/#experimenten'; // fix url that stays on exp. maybe iframe issue??
+                window.top.location.href = 'https://lerenkijken.nl/#experimenten'; 
             }
         },
     };
     
+
+
+    //...............................
+    // PRACTICE TRIALS 	Zie je nog iemand of iets op de brug dat daar niet hoort? Klik of tik dan op alles  wat van de brug af moet.
+    //...............................
+    const pre_practice_trials = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: () => `<h2>Nu weet waar je moet kijken.</h2>`+
+        `<p>Laten we ook kort oefenen met bedienen.</p>` +
+        `<p>Zie je iets of iemand op de brug dat daar niet hoort? ${interaction_type(true)} dan op wat van de brug af moet en ${interaction_type()} op "INGRIJPEN".</p>` +
+        `<p>Zie je meerdere dingen? Wijs het dan allemaal aan! Dat hoeft maar in één camerabeeld.</p>`+
+        `<p>Zie je niets gevaarlijks op de brug? ${interaction_type(true)} dan op "BRUG OPENEN".</p>`,
+        choices: ["<h2>Oefen!</h2>"],
+        data:{
+            label:'pre_practice_trials',
+        }
+    };
+
+    const post_practice_pre_main = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: `<h2>Goed gedaan nu kun je echt aan de slag!</h2>` +
+                  `<p>Dat je het weet: bruggen moeten altijd goed bediend worden, ook in het donker en bij slecht weer. Kijk dus altijd goed!</p>`
+        ,
+        choices: ["<h2>Starten!</h2>"],
+        data:{
+            label:'post_practice_pre_main',
+        }
+    };
+
+
+
+    const miss_try_again = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: `<h1>Je opende de burg, maar er was een gevaarlijke situatie!</h1><h1>Probeer het nog eens!</h1>` ,
+        choices: ["<h2>Verder!</h2>"],
+        data:{
+            label:'miss_try_again',
+        }
+    };
+
+    const FA_try_again = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: `<h1>Je greep in, maar brug kon veilig open.</h1><h1>Probeer het nog eens!</h1>` ,
+        choices: ["<h2>Verder!</h2>"],
+        data:{
+            label:'FA_try_again',
+        }
+    };
+   
+    const hit_continue = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: `<h1>Goed ingegrepen! Er was inderdaad een gevaarlijke situatie!</h1><h1>Jij snap het!</h1>` ,
+        choices: ["<h2>Verder!</h2>"],
+        data:{
+            label:'hit_continue',
+        }
+    };
+
+    const CR_continue = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: `<h1>Goed gedaan! De brug kon inderdaad veilig open.</h1><h1>Jij snap het!</h1>` ,
+        choices: ["<h2>Verder!</h2>"],
+        data:{
+            label:'CR_continue',
+        }
+    };
+
+    const danger_practice_loop = {
+        timeline: [miss_try_again, make_trial(danger_practice_event_number, 'practice_danger')],
+
+        loop_function: function(data) {
+
+            let prev_response = jsPsych.data.get().filter({label:'practice_danger'}).last(1).values()[0]['bridge_report']
+            
+            if (prev_response == 'danger') {
+                return false // correct response so return false to stop looping  
+            } else {
+                return true // wrong response so return true to keep looping
+            }
+        }
+    } 
+
+    const conditionally_loop_danger_practice = {
+        timeline: [danger_practice_loop],
+        conditional_function: function(){
+            let prev_response = jsPsych.data.get().filter({label:'practice_danger'}).last(1).values()[0]['bridge_report']
+            
+            if (prev_response == 'danger') {
+                return false // false,  i.e. skip this trial
+            } else {
+                return true // true, i.e. run this trial
+            }
+        }    
+    }
+
+
+    const safe_practice_loop = {
+        timeline: [FA_try_again, make_trial(safe_practice_event_number, 'practice_safe')],
+
+        loop_function: function(data) {
+
+            let prev_response = jsPsych.data.get().filter({label:'practice_safe'}).last(1).values()[0]['bridge_report']
+            
+            if (prev_response == 'safe') {
+                return false // false,  i.e. stop looping
+            } else {
+                return true // true, i.e. keep looping
+            }
+        }
+    } 
+
+    const conditionally_loop_safe_practice = {
+        timeline: [safe_practice_loop],
+        conditional_function: function(){
+            let prev_response = jsPsych.data.get().filter({label:'practice_safe'}).last(1).values()[0]['bridge_report']
+            
+            if (prev_response == 'safe') {
+                return false // false,  i.e. skip this trial
+            } else {
+                return true // true, i.e. run this trial
+            }
+        }    
+    }
+  
+
+
+    //...............................
+    // Utility trials 
+    //...............................
+
     let interval_ID
     function stall_exp_until_loaded(event_number) {
         const stall_trial = {  
@@ -997,12 +1284,13 @@
             func: function(done){   
                 interval_ID = setInterval(()=>{
                     
-                    let all_imgs_loades = ( loaded_imgs.includes(event_number+' Totaal') &&
+                    let all_imgs_loaded = ( 
+                         loaded_imgs.includes(event_number+' Totaal') &&
                          loaded_imgs.includes(event_number+' Links')  &&
                          loaded_imgs.includes(event_number+' Midden') &&
                          loaded_imgs.includes(event_number+' Rechts') 
                         )
-                    if (all_imgs_loades) {
+                    if (all_imgs_loaded) {
                         done()
                     } else {
                         console.log('Stalling progresss!')
@@ -1078,9 +1366,18 @@
             // after the final experimental trial write summary data to the first object
             let search_trials = jsPsych.data.get().filter({label: 'main_trial'})
             let summary_object = {}   
-            let n_hits = search_trials.filter({sig_det_label:'hit'}).count()
 
-            let mean_rt              = search_trials.select('rt').mean()
+            n_hits = search_trials.filter({sig_det_label:'hit'}).count()
+            n_misses = search_trials.filter({sig_det_label:'miss'}).count()
+            n_correct_rejections = search_trials.filter({sig_det_label:'correct_rejection'}).count()
+            n_false_alarms = search_trials.filter({sig_det_label:'false_alarm'}).count()   
+
+            mean_rt = search_trials.select('rt').mean()
+
+            summary_object['n_hits'] = n_hits
+            summary_object['n_misses'] = n_misses
+            summary_object['mean_rt'] = mean_rt
+
             jsPsych.data.get().first(1).values()[0]['user_summary_info'] = summary_object
         },
         func: function(done){
@@ -1115,106 +1412,18 @@
 
     }
 
-    const miss_try_again = {
-        type: jsPsychHtmlButtonResponse,
-        stimulus: `<h1>Je opende de burg, maar er was een gevaarlijke situatie!</h1><h1>Probeer het nog eens!</h1>` ,
-        choices: ["<h2>Verder!</h2>"],
-        data:{
-            label:'miss_try_again',
-        }
-    };
 
-    const FA_try_again = {
-        type: jsPsychHtmlButtonResponse,
-        stimulus: `<h1>Je greep in, maar brug kon veilig open.</h1><h1>Probeer het nog eens!</h1>` ,
-        choices: ["<h2>Verder!</h2>"],
-        data:{
-            label:'FA_try_again',
-        }
-    };
-   
-    const hit_continue = {
-        type: jsPsychHtmlButtonResponse,
-        stimulus: `<h1>Goed ingegrepen! Er was inderdaad een gevaarlijke situatie!</h1><h1>Jij snap het!</h1>` ,
-        choices: ["<h2>Verder!</h2>"],
-        data:{
-            label:'hit_continue',
-        }
-    };
+    //////////////////////////////////////////
+    //
+    // MAKE TIMELINE
+    //
+    //////////////////////////////////////////  
 
-    const CR_continue = {
-        type: jsPsychHtmlButtonResponse,
-        stimulus: `<h1>Goed gedaan! De brug kon inderdaad veilig open.</h1><h1>Jij snap het!</h1>` ,
-        choices: ["<h2>Verder!</h2>"],
-        data:{
-            label:'CR_continue',
-        }
-    };
+    let timeline = [user_info_trial, preload_imgs_with_call,   
 
-    const danger_practice_loop = {
-        timeline: [miss_try_again, make_trial(danger_practice_event_number, 'practice_danger')],
+        intro_sequence, make_trial('02')
 
-        loop_function: function(data) {
-
-            let prev_response = jsPsych.data.get().filter({label:'practice_danger'}).last(1).values()[0]['bridge_report']
-            
-            if (prev_response == 'danger') {
-                return false // correct response so return false to stop looping  
-            } else {
-                return true // wrong response so return true to keep looping
-            }
-        }
-    } 
-
-    const conditionally_loop_danger_practice = {
-        timeline: [danger_practice_loop],
-        conditional_function: function(){
-            let prev_response = jsPsych.data.get().filter({label:'practice_danger'}).last(1).values()[0]['bridge_report']
-            
-            if (prev_response == 'danger') {
-                return false // false,  i.e. skip this trial
-            } else {
-                return true // true, i.e. run this trial
-            }
-        }    
-    }
-
-////
-    const safe_practice_loop = {
-        timeline: [FA_try_again, make_trial(safe_practice_event_number, 'practice_safe')],
-
-        loop_function: function(data) {
-
-            let prev_response = jsPsych.data.get().filter({label:'practice_safe'}).last(1).values()[0]['bridge_report']
-            
-            if (prev_response == 'safe') {
-                return false // false,  i.e. stop looping
-            } else {
-                return true // truem, i.e. keep looping
-            }
-        }
-    } 
-
-    const conditionally_loop_safe_practice = {
-        timeline: [safe_practice_loop],
-        conditional_function: function(){
-            let prev_response = jsPsych.data.get().filter({label:'practice_safe'}).last(1).values()[0]['bridge_report']
-            
-            if (prev_response == 'safe') {
-                return false // false,  i.e. skip this trial
-            } else {
-                return true // true, i.e. run this trial
-            }
-        }    
-    }
-  
-    // make timeline
-    let timeline = [user_info_trial, preload_imgs_with_call, 
-    intro]
-
-
-
-    // Make timeline (this procedure is the same for systematic and free searchers)
+    ]
 
 
     if (search_condition == 'free') {  // uninstructed search
@@ -1224,14 +1433,14 @@
 
     } else {   // instructed search
         timeline.push(
-            make_instruction_trial('26'),  // 25 is blue
-            make_instruction_trial('27'),  // 25 is green
-            make_instruction_trial('28'),  // 25 is yellow
+            sys_view_sequence
         )
     }
 
     // add practice trials
     timeline.push(
+        pre_practice_trials,
+
         stall_exp_until_loaded(safe_practice_event_number),
         make_trial(safe_practice_event_number, 'practice_safe'),
         conditionally_loop_safe_practice, 
@@ -1241,6 +1450,8 @@
         make_trial(danger_practice_event_number, 'practice_danger'),
         conditionally_loop_danger_practice,
         hit_continue,
+
+        post_practice_pre_main,
     )
 
 
@@ -1301,6 +1512,10 @@
 
     function sum(array){
         return array.reduce((x, y) => x + y,  0);
+    }
+
+    function sum_object_values(obj){
+        return sum(Object.values(obj))
     }
     
 
