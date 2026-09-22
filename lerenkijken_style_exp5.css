@@ -22,15 +22,6 @@ html, body {
   transform: translateX(-50%);
 }
 
-.jspsych-content {
-  background-color: black;
-  color: white;
-  position: fixed;
-  
-  left: 50%; 
-  transform: translateX(-50%);
-}
-
 .canvas-container {
   left: 50%; 
   transform: translateX(-50%);
