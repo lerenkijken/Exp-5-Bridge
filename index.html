@@ -71,7 +71,7 @@
     const exp_conditions = ['systematic', 'free']
     const search_condition = jsPsych.randomization.sampleWithoutReplacement(exp_conditions, 1)[0]
 
-    let exp_version = '0_1_4'
+    let exp_version = '0_1_5'
     const exp_id = 'exp_5_v'+exp_version
     console.log("Exp id: ", exp_id)
     
@@ -93,7 +93,7 @@
         data: url_vars,
         on_finish: function(data) {
             if (data.mobile){
-                document.documentElement.style.zoom = "0.5";
+                // document.documentElement.style.zoom = "0.5";
             }
         }
     };
