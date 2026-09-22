@@ -24,11 +24,11 @@
     <!-- https://fabric5.fabricjs.com/fabric-intro-part-1#objects  -->
     <link href="https://unpkg.com/jspsych@8.2.2/css/jspsych.css" rel="stylesheet" type="text/css" />  
     <link href="lerenkijken_style_exp5.css" rel="stylesheet" />  
-<!--  <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no,minimal-ui"/> -->
-    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+    <meta name="viewport" content="width=device-width,initial-scale=0.5,minimum-scale=1.0,maximum-scale=1.0,user-scalable=yes,minimal-ui"/>
 
   </head>
-  <body oncontextmenu='return false;'></body>
+    <body oncontextmenu='return false;'></body>
   <script>
    async function full_script_async_wrapper(){
 
@@ -64,14 +64,14 @@
 
 
     // determine 
-    const testing_mode = true
+    const testing_mode = false
     if (testing_mode) {
         document.body.style.backgroundImage = `url("bgimg.png")`
     }
     const exp_conditions = ['systematic', 'free']
     const search_condition = jsPsych.randomization.sampleWithoutReplacement(exp_conditions, 1)[0]
 
-    let exp_version = '0_1_5'
+    let exp_version = '0_1_7'
     const exp_id = 'exp_5_v'+exp_version
     console.log("Exp id: ", exp_id)
     
@@ -93,7 +93,13 @@
         data: url_vars,
         on_finish: function(data) {
             if (data.mobile){
-                // document.documentElement.style.zoom = "0.5";
+                console.log('Mobile version')
+
+                document.getElementById("jspsych-content").style.width = "92%";
+                
+            } else {
+                console.log('Desktop version')
+
             }
         }
     };
@@ -212,7 +218,6 @@
         img.src = img_path
         img.onload = ()=>{ 
             loaded_imgs.push(img_name) 
-            console.log('loaded: '+img_name)
         }
         await img.decode();
         
@@ -315,6 +320,14 @@
                 let safe_button_el = document.getElementById("safe-button")
                 let danger_button_el = document.getElementById("danger-button")
 
+                if (! get_device_info().mobile) { // for desktop
+                    for (let el of [safe_button_el, danger_button_el]){
+                        el.style.fontSize = 'large'
+                        el.style.padding = '0em 1em'
+                        el.style.borderRadius = '1em'
+                        el.style.margin = '0.5em'
+                    }
+                }
                 //intitially disable the buttons
                 safe_button_el.setAttribute("disabled", "disabled");
                 danger_button_el.setAttribute("disabled", "disabled");
@@ -556,7 +569,6 @@
                                     time_since_trial_start: performance.now() - trial_start_time,
                                     label: 'reset indicators'
                                 })
-                                console.log(report_sequence)
                             }
 
                             // reset all loc indicators to original position
@@ -869,9 +881,6 @@
                             let report_y_norm = p5map(report_y, vy - vh/2, vy + vh/2, 0, 1) 
 
                                   
-
-                            console.log('report_x_norm', report_x_norm)
-                            console.log('report_y_norm', report_y_norm)
                             loc_indicator.report_x_norm = report_x_norm
                             loc_indicator.report_y_norm = report_y_norm
 
@@ -976,7 +985,10 @@
 
     const intro_sequence = {
         type: jsPsychInstructions,
-        pages:()=> { return [
+        pages:()=> { 
+            
+            return [
+            
 
         //Page 1 html   
          (testing_mode?`<h1>TESTING MODE: ${exp_version}</h1>`:'')  + `<h1>Welkom!</h1>` +
@@ -984,18 +996,18 @@
          `<img src="imgs/main_imgs/full view.png" style="width:${get_canvas_size()[1] *0.75}px" ></img>` ,
 
         //Page 2 html  
-        `<img src="imgs/main_imgs/14 Totaal.png" style="width:${get_canvas_size()[1]}px"></img>`+
+        `<img src="imgs/main_imgs/14 Totaal.png" style="width:${get_canvas_size()[1]*0.95}px"></img>`+
         `<p>Je kan de brug via drie camera's bekijken zoals hierboven.</p>`+
         `<p><strong>Er mag niets tussen de slagbomen staan.</strong><br>Dus geen voetgangers, fietsers, voertuigen, etc.</p>`+
         `<p>Alleen dan mag de brug open.</p>`,
 
         //Page 3 html 
-        `<img src="imgs/main_imgs/25 Totaal.png" style="width:${get_canvas_size()[1]}px"></img>`+
+        `<img src="imgs/main_imgs/25 Totaal.png" style="width:${get_canvas_size()[1]*0.95}px"></img>`+
         `<p>Het gebied tussen de slagbomen is hier rood gemarkeerd.</p>`+
         `<p>In dit rode gebied mag dus niets staan.</p>`,
 
         //Page 4 html
-        `<img src="imgs/main_imgs/25 Totaal.png" style="width:${get_canvas_size()[1]}px"></img>`+
+        `<img src="imgs/main_imgs/25 Totaal.png" style="width:${get_canvas_size()[1]*0.95}px"></img>`+
         `<p>Laten we even oefenen met de camerabeelden.</p>`,
         ]}
         ,
@@ -1407,7 +1419,7 @@
 
     let timeline = [user_info_trial, preload_intro_imgs, preload_imgs_with_call,   
 
-        intro_sequence, sys_view_05
+        intro_sequence,
 
     ]
 

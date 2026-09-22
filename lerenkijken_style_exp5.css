@@ -1,8 +1,8 @@
 
 html, body {
   overscroll-behavior: none;
-      -webkit-user-select: none; /* Safari */
-            user-select: none;
+      /* -webkit-user-select: none;
+            user-select: none; */
 }
 
 .jspsych-display-element {
@@ -17,7 +17,6 @@ html, body {
   background-color: black;
   color: white;
   position: fixed;
-  
   left: 50%; 
   transform: translateX(-50%);
 }
@@ -34,12 +33,13 @@ html, body {
     padding: 0em 1em;
     border: 10px solid transparent;
     border-radius: 1em;
+    margin: 0.5em;   
     color: white;
     background-color: #2b00c8d0;
     font-family: Malington;
     -webkit-user-select: none; /* Safari */
             user-select: none; 
-    margin: 0.5em        
+     
 }
 .jspsych-btn:hover {
   background-color: #2b00c8; 
@@ -54,11 +54,11 @@ html, body {
 
 /* safe bridge button */
 .jspsych-btn-safe {
-    font-size: large; 
-    padding: 0.4em 1em;
-    margin: 1em 1.3em;   
+    /* font-size: large;  */
+    padding: 0em 1em;
     border: 10px solid transparent;
     border-radius: 1em;
+    margin: 0.5em; 
     color: white;
     background-color: #0084ffd0;
     font-family: Malington;
@@ -79,11 +79,11 @@ html, body {
 
 /*  Danger bridge button*/
 .jspsych-btn-danger {
-    font-size: large; 
-    padding: 0.4em 1em;
-    margin: 1em 1.3em;   
+    /* font-size: large;  */
+    padding: 0em 1em;
     border: 10px solid transparent;
     border-radius: 1em;
+    margin: 0.5em; 
     color: white;
     background-color: #d20000;
     font-family: Malington;
