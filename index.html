@@ -25,7 +25,7 @@
     <link href="https://unpkg.com/jspsych@8.2.2/css/jspsych.css" rel="stylesheet" type="text/css" />  
     <link href="lerenkijken_style_exp5.css" rel="stylesheet" />  
 
-    <meta name="viewport" content="user-scalable=yes"/>
+    <meta name="viewport" content="user-scalable=yes">
 
   </head>
   <body oncontextmenu='return false;'></body>
@@ -69,7 +69,7 @@
         document.body.style.backgroundImage = `url("bgimg.png")`
     }
     const exp_conditions = ['systematic', 'free']
-    const search_condition = jsPsych.randomization.sampleWithoutReplacement(exp_conditions, 1)[0]
+    const search_condition ='systematic' // jsPsych.randomization.sampleWithoutReplacement(exp_conditions, 1)[0]
 
     let exp_version = '0_1_0'
     const exp_id = 'exp_5_v'+exp_version
@@ -195,7 +195,7 @@
     // event numbers 25 to 28 are instructions
     // 25 - red:    "Brug"            full search area     (free searching mode)
     // 26 - blue:   "Rijbaan"         driving lane         (systematic searching mode)
-    // 27 - green:  "Fiets-voetpad"   bike and foot path   (systematic searching mode)
+    // 27 - green:  "fiets-/voetpad"   bike and foot path   (systematic searching mode)
     // 28 - yellow: "Randen"          edges                (systematic searching mode)
 
     const loaded_imgs = []
@@ -231,6 +231,7 @@
     //..................................
 
     // load the instruction imgs (based on condition) + practice images 
+  
     let instruction_imgs;
     if (search_condition == 'free') {
         instruction_imgs = ['25']
@@ -248,6 +249,8 @@
         }
         bridge_events[event_number] = event_views
     }
+
+    
 
 
     const preload_imgs_with_call = {
@@ -270,7 +273,11 @@
     }
 
     // feedback labels
-    let n_hits, n_false_alarms, n_misses, n_correct_rejections, mean_rt
+    let n_hits = 0;
+    let n_false_alarms = 0;
+    let n_misses = 0;
+    let n_correct_rejections = 0;
+    let mean_rt = 0;
 
     // make fabric objects of the stimuli
     let danger_button_style = "background-color:#fe9900"
@@ -590,6 +597,7 @@
                 data.view_sequence = view_sequence
                 data.report_sequence = report_sequence
                 data.bridge_report = (data.response == 0) ? "safe" : "danger" 
+                data.bridge_status = (event_id <= 13)     ? "danger" : "safe"
 
                 if (event_id <= 13){ // 1-13 is event / dangerous!
                    data.sig_det_label = (data.bridge_report == 'danger') ? 'hit' : 'miss'                      // if reporting danger -> register hit else register miss
@@ -635,10 +643,10 @@
                            `${interaction_type(true)} op elk gekleurd gebied om te bevestigen dat je elk gebied hebt bekeken. Dan kun je verder!</p>` 
                 } else if (event_id == '28') {
                     return `<p style='padding:0em;margin:0.1em'>${interaction_type(true)} eerst op het linker camerabeeld om die te openen en `+
-                           `${interaction_type()} op <strong>BEIDE</strong> gekleurde vlakken. Doe dan hetzeldfe bij het middelste beeld, en daarna bij het rechter beeld. Dan kun je verder! `
+                           `${interaction_type()} op <strong>BEIDE</strong> gekleurde vlakken. Doe dan hetzelfde bij het middelste beeld, en daarna bij het rechter beeld. Dan kun je verder! `
                 } else {
                     return `<p style='padding:0em;margin:0.1em'>${interaction_type(true)} eerst op het linker camerabeeld om die te openen en `+
-                           `${interaction_type()} op het gekleurde vlak. Doe dan hetzeldfe bij het middelste beeld, en daarna bij het rechter beeld. Dan kun je verder! `
+                           `${interaction_type()} op het gekleurde vlak. Doe dan hetzelfde bij het middelste beeld, en daarna bij het rechter beeld. Dan kun je verder! `
                 }
             
             },
@@ -760,10 +768,24 @@
                     });
 
 
-
                     loc_indicator.set({
                         left:0.1*canvas_rect().height , 
-                        top: 0.1*canvas_rect().height})
+                        top: 0.1*canvas_rect().height
+                    })
+                    
+
+
+                    if (event_id == '28') { // for yellow areas make clear that there are 2 checkmarks!
+                        loc_indicator.set({
+                            left:0.1*canvas_rect().height , 
+                            top: (0.08 + 0.04*i)*canvas_rect().height
+                        })
+                    } 
+                    //store initial locations on canvas
+                    loc_indicator.init_left = loc_indicator.left
+                    loc_indicator.init_top = loc_indicator.top
+
+                    // add to canvas 
                     loc_indicator.setCoords()
                     canvas.add(loc_indicator)
                     loc_indicators_array.push(loc_indicator)
@@ -898,12 +920,12 @@
                             // reset all loc indicators to original position
                             for (let loc_indicator of loc_indicators_array) {
                                 
-                                loc_indicator.animate('left', 0.1*canvas_rect().height, {
+                                loc_indicator.animate('left', loc_indicator.init_left, {
                                     onChange: canvas.renderAll.bind(canvas),
                                     duration: 150,
                                     easing: fabric.util.ease.easeOutQuad              
                                 })
-                                loc_indicator.animate('top', 0.1*canvas_rect().height, {
+                                loc_indicator.animate('top', loc_indicator.init_top, {
                                     onChange: canvas.renderAll.bind(canvas),
                                     duration: 150,
                                     easing: fabric.util.ease.easeOutQuad              
@@ -948,52 +970,6 @@
     // Info / intro trials
     //...............................
 
-
-    // const intro_01 = {
-    //     type: jsPsychHtmlButtonResponse,
-    //     stimulus: () =>  (testing_mode?`<h1>TESTING MODE: ${exp_version}</h1>`:'')  + `<h1>Welkom!</h1>` +
-    //     "<p>Je mag de Haringvlietbrug op afstand bedienen!<br>Jij bepaalt of de brug veilig open kan voor de scheepvaart.</p>"+
-    //      `<img src="imgs/main_imgs/14 Rechts.png" style="width:${get_canvas_size()[1] *0.75}px" ></img>`,
-    //     choices: ["<h2>Verder!</h2>"],
-    //     data:{
-    //         label:'intro_01',
-    //     }
-    // };
-    
-    
-    // const intro_02 = {
-    //     type: jsPsychHtmlButtonResponse,
-    //     stimulus: () =>  `<img src="imgs/main_imgs/14 Totaal.png" style="width:${get_canvas_size()[1]}px"></img>`+
-    //     `<p>Je kan de brug via drie cameras bekijken zoals hierboven.</p>`+
-    //     `<p><strong>Er mag niets tussen de slagbomen staan.</strong><br>Dus geen voetgangers, fietsers, voertuigen, etc.</p>`+
-    //     `<p>Alleen dan mag de brug open.</p>`,
-    //     choices: ["<h2>Verder!</h2>"],
-    //     data:{
-    //         label:'intro_02',
-    //     }
-    // };
-    
-    // const intro_03 = {
-    //     type: jsPsychHtmlButtonResponse,
-    //     stimulus: () =>  `<img src="imgs/main_imgs/25 Totaal.png" style="width:${get_canvas_size()[1]}px"></img>`+
-    //     `<p>Het gebied tussen de slagbomen is hier rood gemarkeerd.</p>`+
-    //     `<p>In dit rode gebied mag dus niets staan.</p>`,
-    //     choices: ["<h2>Verder!</h2>"],
-    //     data:{
-    //         label:'intro_03',
-    //     }
-    // };
-
-    // const intro_04 = {
-    //     type: jsPsychHtmlButtonResponse,
-    //     stimulus: () =>  `<img src="imgs/main_imgs/25 Totaal.png" style="width:${get_canvas_size()[1]}px"></img>`+
-    //     `<p>Laten we even oefenen met de camerabeelden.</p>`,
-    //     choices: ["<h2>Verder!</h2>"],
-    //     data:{
-    //         label:'intro_04',
-    //     }
-    // };
-        
     const intro_sequence = {
         type: jsPsychInstructions,
         pages:()=> { return [
@@ -1001,11 +977,11 @@
         //Page 1 html   
          (testing_mode?`<h1>TESTING MODE: ${exp_version}</h1>`:'')  + `<h1>Welkom!</h1>` +
         "<p>Je mag de Haringvlietbrug op afstand bedienen!<br>Jij bepaalt of de brug veilig open kan voor de scheepvaart.</p>"+
-         `<img src="imgs/main_imgs/14 Rechts.png" style="width:${get_canvas_size()[1] *0.75}px" ></img>` ,
+         `<img src="imgs/main_imgs/full view.png" style="width:${get_canvas_size()[1] *0.75}px" ></img>` ,
 
         //Page 2 html  
         `<img src="imgs/main_imgs/14 Totaal.png" style="width:${get_canvas_size()[1]}px"></img>`+
-        `<p>Je kan de brug via drie cameras bekijken zoals hierboven.</p>`+
+        `<p>Je kan de brug via drie camera's bekijken zoals hierboven.</p>`+
         `<p><strong>Er mag niets tussen de slagbomen staan.</strong><br>Dus geen voetgangers, fietsers, voertuigen, etc.</p>`+
         `<p>Alleen dan mag de brug open.</p>`,
 
@@ -1030,7 +1006,7 @@
         type: jsPsychHtmlButtonResponse,
         stimulus: () =>  
         `<img src="imgs/main_imgs/25 Totaal.png" style="width:${get_canvas_size()[1]}px"></img>`+
-        `<p>Om het rode vlak goed te bekijken, volg jij een<br><strong>GESTRUCTUREERD KIJKPLAN</strong>.<br>`+
+        `<p>Om het rode vlak goed te bekijken, volg jij een<br><strong>KIJKPLAN</strong>.<br>`+
         `Het kijkplan verdeelt het rode vlak in drie delen (rijbaan, fiets-/voetpad, randen).<br>Je bekijkt deze vlakken één voor één.</p>`,
         choices: ["<h2>Verder!</h2>"],
         data:{
@@ -1041,7 +1017,7 @@
     const sys_view_02 = {
         type: jsPsychHtmlButtonResponse,
         stimulus: () =>  `<img src="imgs/main_imgs/26 Totaal.png" style="width:${get_canvas_size()[1]}px"></img>`+
-        `<p>Je begint met kijken naar de rijbaan (hier blauwe gemarkeerd).<br>Eerst links, dan midden, dan rechts.</p>`,
+        `<p>Je begint met kijken naar de rijbaan (hier blauw gemarkeerd).<br>Eerst links, dan midden, dan rechts.</p>`,
         choices: ["<h2>Verder!</h2>"],
         data:{
             label:'sys_view_02',
@@ -1051,7 +1027,7 @@
     const sys_view_03 = {
         type: jsPsychHtmlButtonResponse,
         stimulus: () =>  `<img src="imgs/main_imgs/27 Totaal.png" style="width:${get_canvas_size()[1]}px"></img>`+
-        `<p>Dan kijk je naar het fietspad en voetpad (hier groen gemarkeerd).<br>Eerst links, dan midden, dan rechts.</p>`,
+        `<p>Dan kijk je naar het fiets-/voetpad (hier groen gemarkeerd).<br>Eerst links, dan midden, dan rechts.</p>`,
         choices: ["<h2>Verder!</h2>"],
         data:{
             label:'sys_view_03',
@@ -1072,7 +1048,7 @@
         stimulus: () =>  `<h2>Goed bezig! Dat waren alle stappen!</h2>` +
             `<p style="margin-bottom:0em"><br>Met het kijkplan bekijk je dus de beelden steeds van links naar rechts.<br>Eerst de rijbaan.</p>`+
         `<img src="imgs/main_imgs/26 Totaal.png" style="width:${get_canvas_size()[1]*0.6}px"></img>`+
-            `<p style="margin-bottom:0em">Dan het voet-/fietspad.</p>`+
+            `<p style="margin-bottom:0em">Dan het fiets-/voetpad.</p>`+
         `<img src="imgs/main_imgs/27 Totaal.png" style="width:${get_canvas_size()[1]*0.6}px"></img>`+
             `<p style="margin-bottom:0em">Dan de randen.</p>`+
         `<img src="imgs/main_imgs/28 Totaal.png" style="width:${get_canvas_size()[1]*0.6}px"></img>`+
@@ -1153,7 +1129,7 @@
     //...............................
     const pre_practice_trials = {
         type: jsPsychHtmlButtonResponse,
-        stimulus: () => `<h2>Nu weet waar je moet kijken.</h2>`+
+        stimulus: () => `<h2>Nu weet je waar je moet kijken.</h2>`+
         `<p>Laten we ook kort oefenen met bedienen.</p>` +
         `<p>Zie je iets of iemand op de brug dat daar niet hoort? ${interaction_type(true)} dan op wat van de brug af moet en ${interaction_type()} op "INGRIJPEN".</p>` +
         `<p>Zie je meerdere dingen? Wijs het dan allemaal aan! Dat hoeft maar in één camerabeeld.</p>`+
@@ -1166,7 +1142,7 @@
 
     const post_practice_pre_main = {
         type: jsPsychHtmlButtonResponse,
-        stimulus: `<h2>Goed gedaan nu kun je echt aan de slag!</h2>` +
+        stimulus: `<h2>Goed gedaan! Nu kun je echt aan de slag!</h2>` +
                   `<p>Dat je het weet: bruggen moeten altijd goed bediend worden, ook in het donker en bij slecht weer. Kijk dus altijd goed!</p>`
         ,
         choices: ["<h2>Starten!</h2>"],
@@ -1179,7 +1155,7 @@
 
     const miss_try_again = {
         type: jsPsychHtmlButtonResponse,
-        stimulus: `<h1>Je opende de burg, maar er was een gevaarlijke situatie!</h1><h1>Probeer het nog eens!</h1>` ,
+        stimulus: `<h1>Je opende de brug, maar er was een gevaarlijke situatie!</h1><h1>Probeer het nog eens!</h1>` ,
         choices: ["<h2>Verder!</h2>"],
         data:{
             label:'miss_try_again',
@@ -1188,7 +1164,7 @@
 
     const FA_try_again = {
         type: jsPsychHtmlButtonResponse,
-        stimulus: `<h1>Je greep in, maar brug kon veilig open.</h1><h1>Probeer het nog eens!</h1>` ,
+        stimulus: `<h1>Je greep in, maar de brug kon veilig open.</h1><h1>Probeer het nog eens!</h1>` ,
         choices: ["<h2>Verder!</h2>"],
         data:{
             label:'FA_try_again',
@@ -1197,7 +1173,7 @@
    
     const hit_continue = {
         type: jsPsychHtmlButtonResponse,
-        stimulus: `<h1>Goed ingegrepen! Er was inderdaad een gevaarlijke situatie!</h1><h1>Jij snap het!</h1>` ,
+        stimulus: `<h1>Goed ingegrepen! Er was inderdaad een gevaarlijke situatie!</h1><h1>Jij snapt het!</h1>` ,
         choices: ["<h2>Verder!</h2>"],
         data:{
             label:'hit_continue',
@@ -1206,7 +1182,7 @@
 
     const CR_continue = {
         type: jsPsychHtmlButtonResponse,
-        stimulus: `<h1>Goed gedaan! De brug kon inderdaad veilig open.</h1><h1>Jij snap het!</h1>` ,
+        stimulus: `<h1>Goed gedaan! De brug kon inderdaad veilig open.</h1><h1>Jij snapt het!</h1>` ,
         choices: ["<h2>Verder!</h2>"],
         data:{
             label:'CR_continue',
@@ -1364,15 +1340,16 @@
         async: true,
         on_start: function(){
             // after the final experimental trial write summary data to the first object
-            let search_trials = jsPsych.data.get().filter({label: 'main_trial'})
+            let main_trials = jsPsych.data.get().filter({label: 'main_trial'})
             let summary_object = {}   
 
-            n_hits = search_trials.filter({sig_det_label:'hit'}).count()
-            n_misses = search_trials.filter({sig_det_label:'miss'}).count()
-            n_correct_rejections = search_trials.filter({sig_det_label:'correct_rejection'}).count()
-            n_false_alarms = search_trials.filter({sig_det_label:'false_alarm'}).count()   
+            n_hits = main_trials.filter({sig_det_label:'hit'}).count()
 
-            mean_rt = search_trials.select('rt').mean()
+            n_misses = main_trials.filter({sig_det_label:'miss'}).count()
+            n_correct_rejections = main_trials.filter({sig_det_label:'correct_rejection'}).count()
+            n_false_alarms = main_trials.filter({sig_det_label:'false_alarm'}).count()   
+
+            mean_rt = main_trials.select('rt').mean()
 
             summary_object['n_hits'] = n_hits
             summary_object['n_misses'] = n_misses
@@ -1412,6 +1389,11 @@
 
     }
 
+    const preload_welcome_img = {
+        type: jsPsychPreload,
+        images: ['imgs/main_imgs/full view.png', 'imgs/main_imgs/14 Totaal.png']
+    }
+
 
     //////////////////////////////////////////
     //
@@ -1419,9 +1401,9 @@
     //
     //////////////////////////////////////////  
 
-    let timeline = [user_info_trial, preload_imgs_with_call,   
+    let timeline = [user_info_trial, preload_welcome_img, preload_imgs_with_call,   
 
-        intro_sequence, make_trial('02')
+        intro_sequence, 
 
     ]
 
@@ -1547,7 +1529,7 @@ To do's:
 
   - If no, this can be checked offline after data is gathered (the indicated locations are saved in normalized units* ). 
   - If no, we can indicate at the end genericly "X of Y bridges opened safely" AND "M of N bridges opened in dangerous circumstances."
-  - 4 van 10 veilig burggen heb je geopend. 
+  - 4 van 10 veilig bruggen heb je geopend. 
   - bij 7 van de 10 onvelige bruggen heb je ingegrepen. 
 
   * units defined by location on image itself: ie topleft = (0,0);   bottomright=(1,1);  center=(0.5,0.5)
