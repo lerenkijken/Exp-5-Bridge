@@ -666,7 +666,7 @@
         let fabric_trial = {
             type: jsPsychCanvasButtonResponse,
             canvas_size: get_canvas_size,
-            choices:() => [h2_button_html('Verder')],
+            choices:() => [h2_button_html('Verder >')],
             prompt:() => {
                 if (search_condition == 'free') {
                     return `<p style='padding:0em;margin:0.1em'>${interaction_type(true)} op een camerabeeld om het te openen. `+
@@ -1038,7 +1038,7 @@
         `<img src="imgs/main_imgs/25 Totaal.png" style="width:${get_canvas_size()[1]}px"></img>`+
         `<p>Om het rode vlak goed te bekijken, volg jij een<br><strong>KIJKPLAN</strong>.<br>`+
         `Het kijkplan verdeelt het rode vlak in drie delen (rijbaan, fiets-/voetpad, randen).<br>Je bekijkt deze vlakken één voor één.</p>`,
-        choices: () => [h2_button_html('Verder')],
+        choices: () => [h2_button_html('Verder >')],
         data:{
             label:'sys_view_01',
         }        
@@ -1210,7 +1210,7 @@
     const miss_try_again = {
         type: jsPsychHtmlButtonResponse,
         stimulus: `<h1>Je opende de brug, maar er was een gevaarlijke situatie!</h1><h1>Probeer het nog eens!</h1>` ,
-        choices: () => [h2_button_html('Verder')],
+        choices: () => [h2_button_html('Verder >')],
         data:{
             label:'miss_try_again',
         }
@@ -1219,7 +1219,7 @@
     const FA_try_again = {
         type: jsPsychHtmlButtonResponse,
         stimulus: `<h1>Je greep in, maar de brug kon veilig open.</h1><h1>Probeer het nog eens!</h1>` ,
-        choices: () => [h2_button_html('Verder')],
+        choices: () => [h2_button_html('Verder >')],
         data:{
             label:'FA_try_again',
         }
@@ -1228,7 +1228,7 @@
     const hit_continue = {
         type: jsPsychHtmlButtonResponse,
         stimulus: `<h1>Goed ingegrepen! Er was inderdaad een gevaarlijke situatie!</h1><h1>Jij snapt het!</h1>` ,
-        choices: () => [h2_button_html('Verder')],
+        choices: () => [h2_button_html('Verder >')],
         data:{
             label:'hit_continue',
         }
@@ -1237,7 +1237,7 @@
     const CR_continue = {
         type: jsPsychHtmlButtonResponse,
         stimulus: `<h1>Goed gedaan! De brug kon inderdaad veilig open.</h1><h1>Jij snapt het!</h1>` ,
-        choices: () => [h2_button_html('Verder')],
+        choices: () => [h2_button_html('Verder >')],
         data:{
             label:'CR_continue',
         }
