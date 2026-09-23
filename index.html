@@ -72,7 +72,7 @@
     const exp_conditions = ['systematic', 'free']
     const search_condition = jsPsych.randomization.sampleWithoutReplacement(exp_conditions, 1)[0]
 
-    let exp_version = '0_1_8'
+    let exp_version = '0_2_0'
     const exp_id = 'exp_5_v'+exp_version
     console.log("Exp id: ", exp_id)
     
@@ -1091,20 +1091,25 @@
     const halfway_trial = {
         type: jsPsychHtmlButtonResponse,
         stimulus: () =>  {
-            let t1 = `<h2 style="margin-bottom:0.1em;margin-top:0em">Je bent op de helft!</h2>`
+            let html_half = `<h2 style="margin-bottom:0.1em;margin-top:0em">Je bent op de helft!</h2>`
+
+            let html_free = `<p style="margin-bottom:0em">Hier nog een reminder: Tussen de slagbomen mag dus niets staan.<br>Het gebied tussen de slagbomen zie je hier rood gemarkeerd.</p>`+
+            `<img src="imgs/main_imgs/25 Totaal.png" style="width:${get_canvas_size()[1]*0.8}px"></img>`
+            
              
-            let t2 = `<p style="margin-bottom:0em">Hier weer een reminder: Je bekijkt de beelden steeds van links naar rechts.<br>Eerst de rijbaan.</p>`+
+            let html_syst = `<p style="margin-bottom:0em">Hier nog een reminder: Je bekijkt de beelden steeds van links naar rechts.<br>Eerst de rijbaan.</p>`+
         `<img src="imgs/main_imgs/26 Totaal.png" style="width:${get_canvas_size()[1]*0.6}px"></img>`+
             `<p style="margin-bottom:0em">Dan het fiets-/voetpad.</p>`+
         `<img src="imgs/main_imgs/27 Totaal.png" style="width:${get_canvas_size()[1]*0.6}px"></img>`+
             `<p style="margin-bottom:0em">Dan de randen.</p>`+
         `<img src="imgs/main_imgs/28 Totaal.png" style="width:${get_canvas_size()[1]*0.6}px"></img>`+
         `<p style="margin-bottom:0em">Als je het kijkplan goed volgt, bekijk je elk camerabeeld dus drie keer voordat je de brug bedient.</p>`
-            return search_condition == 'free' ? t1 : t1+t2
+            
+        return search_condition == 'free' ? html_half+html_free : html_half+html_syst
     },
         choices: () => [h2_button_html('Verder >')],
         data:{
-            label:'sys_view_06',
+            label:'halfway_trial',
         }        
     }
 
@@ -1502,8 +1507,11 @@ h2_button_html('Weet ik niet (zeker)'), h2_button_html('Zeg ik liever niet')],
     //////////////////////////////////////////  
 
     let timeline = [user_info_trial, preload_intro_imgs, preload_imgs_with_call,   
-
         intro_sequence, 
+
+        /// TESTING TRIAL
+        
+        /// TESTING TRIALS
     ]
 
 
@@ -1555,9 +1563,10 @@ h2_button_html('Weet ik niet (zeker)'), h2_button_html('Zeg ik liever niet')],
     }
     timeline.pop() // remove last "inter_trial"
 
-    timeline.push(save_data_final)
+
     timeline.push(questions_intro, question_1, question_1_follow_up)
 
+    timeline.push(save_data_final)
     timeline.push(debrief)
    
    
