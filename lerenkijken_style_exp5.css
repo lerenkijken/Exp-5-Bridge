@@ -29,7 +29,7 @@ html, body {
 
 /* Generic button */
 .jspsych-btn {
-    font-size: large; 
+    font-size: medium; 
     padding: 0em 1em;
     border: 10px solid transparent;
     border-radius: 1em;
@@ -41,6 +41,7 @@ html, body {
             user-select: none; 
      
 }
+
 .jspsych-btn:hover {
   background-color: #2b00c8; 
   border-color: #2b00c8;

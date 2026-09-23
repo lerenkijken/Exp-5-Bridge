@@ -71,7 +71,7 @@
     const exp_conditions = ['systematic', 'free']
     const search_condition = jsPsych.randomization.sampleWithoutReplacement(exp_conditions, 1)[0]
 
-    let exp_version = '0_1_7'
+    let exp_version = '0_1_8'
     const exp_id = 'exp_5_v'+exp_version
     console.log("Exp id: ", exp_id)
     
@@ -96,7 +96,8 @@
                 console.log('Mobile version')
 
                 document.getElementById("jspsych-content").style.width = "92%";
-                
+                document.getElementById("jspsych-content").style.width = "92%";
+                document.getElementById("jspsych-content").style.width = "92%";
             } else {
                 console.log('Desktop version')
 
@@ -133,16 +134,28 @@
 
     // appearacnce parameters
     const fabric_canvas_bg_col = '#202020'
+
+
   
     // get device info 
     let get_device_info = () => jsPsych.data.get().filter({trial_type: "browser-check"})['trials'][0]
 
+
+
     function interaction_type(captialize=false){
-        let s = get_device_info().moblie ? 'tik' : 'klik'
+        let s = get_device_info().mobile ? 'tik' : 'klik'
         if (captialize) {
             s = s[0].toUpperCase() + s.slice(1)
         }
         return s
+    }
+
+    function h2_button_html (text) {
+        if (  get_device_info().mobile ) {
+            return `<h2 style="font-size:medium";>${text}</h2>`
+        } else {
+            return `<h2>${text}</h2>`
+        }
     }
 
     function get_window_size() {
@@ -652,7 +665,7 @@
         let fabric_trial = {
             type: jsPsychCanvasButtonResponse,
             canvas_size: get_canvas_size,
-            choices: ['<h2>Verder</h2>'],
+            choices:() => [h2_button_html('Verder')],
             prompt:() => {
                 if (search_condition == 'free') {
                     return `<p style='padding:0em;margin:0.1em'>${interaction_type(true)} op een camerabeeld om het te openen. `+
@@ -1011,8 +1024,8 @@
         `<p>Laten we even oefenen met de camerabeelden.</p>`,
         ]}
         ,
-        button_label_next: `<p>Verder ></p>`,
-        button_label_previous: `<p>< Terug</p>`,
+        button_label_next: () => h2_button_html('Verder >'),
+        button_label_previous:() => h2_button_html('< Terug'),
         allow_backward:true,
         show_clickable_nav: true,
     }
@@ -1024,7 +1037,7 @@
         `<img src="imgs/main_imgs/25 Totaal.png" style="width:${get_canvas_size()[1]}px"></img>`+
         `<p>Om het rode vlak goed te bekijken, volg jij een<br><strong>KIJKPLAN</strong>.<br>`+
         `Het kijkplan verdeelt het rode vlak in drie delen (rijbaan, fiets-/voetpad, randen).<br>Je bekijkt deze vlakken één voor één.</p>`,
-        choices: ["<h2>Verder!</h2>"],
+        choices: () => [h2_button_html('Verder')],
         data:{
             label:'sys_view_01',
         }        
@@ -1034,7 +1047,7 @@
         type: jsPsychHtmlButtonResponse,
         stimulus: () =>  `<img src="imgs/main_imgs/26 Totaal.png" style="width:${get_canvas_size()[1]}px"></img>`+
         `<p>Je begint met kijken naar de rijbaan (hier blauw gemarkeerd).<br>Eerst links, dan midden, dan rechts.</p>`,
-        choices: ["<h2>Verder!</h2>"],
+        choices: () => [h2_button_html('Verder >')],
         data:{
             label:'sys_view_02',
         }        
@@ -1044,7 +1057,7 @@
         type: jsPsychHtmlButtonResponse,
         stimulus: () =>  `<img src="imgs/main_imgs/27 Totaal.png" style="width:${get_canvas_size()[1]}px"></img>`+
         `<p>Dan kijk je naar het fiets-/voetpad (hier groen gemarkeerd).<br>Eerst links, dan midden, dan rechts.</p>`,
-        choices: ["<h2>Verder!</h2>"],
+        choices: () => [h2_button_html('Verder >')],
         data:{
             label:'sys_view_03',
         }        
@@ -1054,7 +1067,7 @@
         type: jsPsychHtmlButtonResponse,
         stimulus: () =>  `<img src="imgs/main_imgs/28 Totaal.png" style="width:${get_canvas_size()[1]}px"></img>`+
         `<p>Als laatste kijk je naar de randen (hier geel gemarkeerd).<br>Eerst links, dan midden, dan rechts.</p>`,
-        choices: ["<h2>Verder!</h2>"],
+        choices: () => [h2_button_html('Verder >')],
         data:{
             label:'sys_view_04',
         }        
@@ -1069,7 +1082,7 @@
             `<p style="margin-bottom:0em">Dan de randen.</p>`+
         `<img src="imgs/main_imgs/28 Totaal.png" style="width:${get_canvas_size()[1]*0.6}px"></img>`+
         `<p style="margin-bottom:0em">Als je het kijkplan goed volgt, bekijk je elk camerabeeld dus drie keer voordat je de brug bedient.</p>`,
-        choices: ["<h2>Verder!</h2>"],
+        choices: () => [h2_button_html('Verder >')],
         data:{
             label:'sys_view_05',
         }        
@@ -1095,7 +1108,7 @@
     const inter_trial = {
         type: jsPsychHtmlButtonResponse,
         stimulus: `<h1>Klaar voor de volgende?</h1>` ,
-        choices: ["<h2>Verder!</h2>"],
+        choices: () => [h2_button_html('Verder >')],
         data:{
             label:'inter_trial',
         }
@@ -1108,7 +1121,7 @@
         stimulus: `<h1>Even pauze?</h1>` +
         "<p>Je bent halverwege! Hoe vind je het gaan tot nu toe?</p>"+
         "<p>Je kan door als je er weer klaar voor bent.</p>",
-        choices: ["Verder!"],
+        choices: () => [h2_button_html('Verder >')],
         data:{
             label:'pause',
         }
@@ -1150,7 +1163,7 @@
         `<p>Zie je iets of iemand op de brug dat daar niet hoort? ${interaction_type(true)} dan op wat van de brug af moet en ${interaction_type()} op "INGRIJPEN".</p>` +
         `<p>Zie je meerdere dingen? Wijs het dan allemaal aan! Dat hoeft maar in één camerabeeld.</p>`+
         `<p>Zie je niets gevaarlijks op de brug? ${interaction_type(true)} dan op "BRUG OPENEN".</p>`,
-        choices: ["<h2>Oefen!</h2>"],
+        choices:() => [h2_button_html('Oefen!')],
         data:{
             label:'pre_practice_trials',
         }
@@ -1161,7 +1174,7 @@
         stimulus: `<h2>Goed gedaan! Nu kun je echt aan de slag!</h2>` +
                   `<p>Dat je het weet: bruggen moeten altijd goed bediend worden, ook in het donker en bij slecht weer. Kijk dus altijd goed!</p>`
         ,
-        choices: ["<h2>Starten!</h2>"],
+        choices:() => [h2_button_html('Starten')],
         data:{
             label:'post_practice_pre_main',
         }
@@ -1172,7 +1185,7 @@
     const miss_try_again = {
         type: jsPsychHtmlButtonResponse,
         stimulus: `<h1>Je opende de brug, maar er was een gevaarlijke situatie!</h1><h1>Probeer het nog eens!</h1>` ,
-        choices: ["<h2>Verder!</h2>"],
+        choices: () => [h2_button_html('Verder')],
         data:{
             label:'miss_try_again',
         }
@@ -1181,7 +1194,7 @@
     const FA_try_again = {
         type: jsPsychHtmlButtonResponse,
         stimulus: `<h1>Je greep in, maar de brug kon veilig open.</h1><h1>Probeer het nog eens!</h1>` ,
-        choices: ["<h2>Verder!</h2>"],
+        choices: () => [h2_button_html('Verder')],
         data:{
             label:'FA_try_again',
         }
@@ -1190,7 +1203,7 @@
     const hit_continue = {
         type: jsPsychHtmlButtonResponse,
         stimulus: `<h1>Goed ingegrepen! Er was inderdaad een gevaarlijke situatie!</h1><h1>Jij snapt het!</h1>` ,
-        choices: ["<h2>Verder!</h2>"],
+        choices: () => [h2_button_html('Verder')],
         data:{
             label:'hit_continue',
         }
@@ -1199,7 +1212,7 @@
     const CR_continue = {
         type: jsPsychHtmlButtonResponse,
         stimulus: `<h1>Goed gedaan! De brug kon inderdaad veilig open.</h1><h1>Jij snapt het!</h1>` ,
-        choices: ["<h2>Verder!</h2>"],
+        choices: () => [h2_button_html('Verder')],
         data:{
             label:'CR_continue',
         }
@@ -1526,17 +1539,8 @@
 
 <!-- 
 
-To do's:
-- Make intro sequence for each condition
-- change imgs 5 Totaal and 9 from source folder
-
-
-- 
-
-05 and 14 are the practice trials:
-  - 05 car is on the brigde
-  - 14 safe to open bridge 
-
+To do's:- 
+ - 
 
 
 - Think about feedback: 
@@ -1550,6 +1554,10 @@ To do's:
 
   * units defined by location on image itself: ie topleft = (0,0);   bottomright=(1,1);  center=(0.5,0.5)
 
+05 and 14 are the practice trials:
+  - 05 car is on the brigde
+  - 14 safe to open bridge 
+
 
 Done:
 - split PPs into 2 conditions: the variable search_condition is set to either "systematic" or "free"
@@ -1562,6 +1570,9 @@ Done:
 
 - click on each area to indicate order and confim seen 
 
+- change imgs 5 Totaal and 9 from source folder
+
+- fixed button size on mobile and desktop
 
 -->
 
