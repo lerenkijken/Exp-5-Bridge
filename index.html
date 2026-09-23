@@ -1306,7 +1306,7 @@
     //...............................
     const questions_intro = {
         type: jsPsychHtmlButtonResponse,
-        stimulus: () =>  `<h2>Jouw diest zit er op!</h2>`+
+        stimulus: () =>  `<h2>Jouw dienst zit erop!</h2>`+
         `<p>Voordat we naar je score gaan, hebben we nog één vraag.</p>`,
         choices: () => [h2_button_html('Verder >')],
         data:{
@@ -1316,9 +1316,10 @@
 
     const question_1 = {
         type: jsPsychHtmlButtonResponse,
-        stimulus: () =>  `<p>Heb jij een baan of hobby waarbij je goed moet kijken en geen belangrijke dingen mag missen? (Denk aan: beveiliger, radioloog, fotograaf, etc.)</p>`,
-        choices: () => [h2_button_html('Ja'), h2_button_html('Nee'), h2_button_html('Zeg ik liever niet')],
-        grid_rows:3,
+        stimulus: () =>  `<p>Heb jij een baan of hobby waarbij je goed moet kijken en geen belangrijke dingen mag missen (bijvoorbeeld beveiliger, radioloog, fotograaf, etc.)?</p>`,
+        choices: () => [h2_button_html('Ja'), h2_button_html('Nee'), 
+h2_button_html('Weet ik niet (zeker)'), h2_button_html('Zeg ik liever niet')],
+        grid_rows:4,
         data:{
             label:'question_1',
         }   
@@ -1328,7 +1329,7 @@
     const question_1_follow_up_inner = {
         type: jsPsychSurveyText,
         questions: [
-            {prompt: 'Wil je vertellen wat je baan of hobby is?'}
+            {prompt: 'Wil je vertellen wat je baan of hobby is?', rows:2}
         ],
         button_label: `Verder`       
      }
@@ -1337,7 +1338,7 @@
         conditional_function: function(){
             let prev_response = jsPsych.data.get().filter({label:'question_1'}).last(1).values()[0]['response']
             
-            if (prev_response == 0) {
+            if (prev_response != 3) {
                 return true // true, i.e. run this trial
             } else {
                 return false // false,  i.e. skip this trial
