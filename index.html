@@ -1074,7 +1074,7 @@
     }
     const sys_view_05 = {
         type: jsPsychHtmlButtonResponse,
-        stimulus: () =>  `<h2 style="margin-bottom:0.1em">Goed bezig! Dat waren alle stappen!</h2>` +
+        stimulus: () =>  `<h2 style="margin-bottom:0.1em;margin-top:0em">Goed bezig! Dat waren alle stappen!</h2>` +
             `<p style="margin-bottom:0em">Met het kijkplan bekijk je dus de beelden steeds van links naar rechts.<br>Eerst de rijbaan.</p>`+
         `<img src="imgs/main_imgs/26 Totaal.png" style="width:${get_canvas_size()[1]*0.6}px"></img>`+
             `<p style="margin-bottom:0em">Dan het fiets-/voetpad.</p>`+
@@ -1090,9 +1090,9 @@
     const halfway_trial = {
         type: jsPsychHtmlButtonResponse,
         stimulus: () =>  {
-            let t1 = `<h2 style="margin-bottom:0.1em">Goed bezig! Je bent op de helft!</h2>`
+            let t1 = `<h2 style="margin-bottom:0.1em;margin-top:0em">Je bent op de helft!</h2>`
              
-            let t2 = `<p style="margin-bottom:0em">Hier weer een reminder: Met het kijkplan bekijk je dus de beelden steeds van links naar rechts.<br>Eerst de rijbaan.</p>`+
+            let t2 = `<p style="margin-bottom:0em">Hier weer een reminder: Je bekijkt de beelden steeds van links naar rechts.<br>Eerst de rijbaan.</p>`+
         `<img src="imgs/main_imgs/26 Totaal.png" style="width:${get_canvas_size()[1]*0.6}px"></img>`+
             `<p style="margin-bottom:0em">Dan het fiets-/voetpad.</p>`+
         `<img src="imgs/main_imgs/27 Totaal.png" style="width:${get_canvas_size()[1]*0.6}px"></img>`+

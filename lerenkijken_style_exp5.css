@@ -1,9 +1,7 @@
-
+/* 
 html, body {
   overscroll-behavior: none;
-      /* -webkit-user-select: none;
-            user-select: none; */
-}
+} */
 
 .jspsych-display-element {
   /* font-size: 25px; */
