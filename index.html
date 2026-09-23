@@ -16,6 +16,7 @@
     <script src="https://unpkg.com/@jspsych/plugin-canvas-keyboard-response@1.1.3"></script>
     <script src="https://unpkg.com/@jspsych/plugin-canvas-button-response@2.1.0"></script>
     <script src="https://unpkg.com/@jspsych/plugin-browser-check@2.1.0"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-survey-text@2.1.1"></script>
     <script src="plugin-instructions.js"></script> 
 
     <script src="https://code.jquery.com/jquery-4.0.0.min.js"></script>
@@ -1148,18 +1149,23 @@
 
     const debrief = {
         type: jsPsychHtmlButtonResponse,
-        stimulus: () =>{return `<h1>Dat was 'm!</h1>` +
-        "<p>Je hebt alle beelden gecontroleerd!</p>" +
-        `Je greep in bij ${n_hits} van de ${n_danger_trials} gevaarlijke situaties!<br>` +
-        `En je hebt ${n_correct_rejections} van de ${n_safe_trials} bruggen veilig geopend!<br>` +
-        `Je bekeek elke brug ongeveer ${(mean_rt/1000).toFixed(1)} seconden.<br>`
-        }  ,
+        stimulus: () =>{
+            let close_window_text = (url_vars.oid == 'betweter') ? `<h1>Je mag nu de bowser afsluiten!</h1>` : ''
+
+            return  `<h1>Dat was 'm!</h1>` +
+                    `<p>Je hebt alle beelden gecontroleerd!</p>` +
+                    `Je greep in bij ${n_hits} van de ${n_danger_trials} gevaarlijke situaties!<br>` +
+                    `En je hebt ${n_correct_rejections} van de ${n_safe_trials} bruggen veilig geopend!<br>` +
+                    `Je bekeek elke brug ongeveer ${(mean_rt/1000).toFixed(1)} seconden.`
+         + close_window_text
+        },
         grid_rows:2,
-        choices: ["Probeer het nog eens!", "Doe een ander Experiment"] ,
+        choices: () => (url_vars.oid == 'betweter') ? [] : [h2_button_html("Probeer het nog eens!"), h2_button_html("Doe een ander Experiment")] ,
         data:{
             label:'debrief',
         },
         on_finish: function(){
+
             let resp_idx = jsPsych.data.get().last().select('response').values[0]
             if (resp_idx == 0){
                 window.top.location.href = 'https://lerenkijken.nl/experiment/open-de-haringvlietbrug'
@@ -1295,6 +1301,51 @@
     }
   
 
+    //...............................
+    // Final questions
+    //...............................
+    const questions_intro = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: () =>  `<h2>Jouw diest zit er op!</h2>`+
+        `<p>Voordat we naar je score gaan, hebben we nog één vraag.</p>`,
+        choices: () => [h2_button_html('Verder >')],
+        data:{
+            label:'questions_intro',
+        }   
+    }
+
+    const question_1 = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: () =>  `<p>Heb jij een baan of hobby waarbij je goed moet kijken en geen belangrijke dingen mag missen? (Denk aan: beveiliger, radioloog, fotograaf, etc.)</p>`,
+        choices: () => [h2_button_html('Ja'), h2_button_html('Nee'), h2_button_html('Zeg ik liever niet')],
+        grid_rows:3,
+        data:{
+            label:'question_1',
+        }   
+    }
+
+    
+    const question_1_follow_up_inner = {
+        type: jsPsychSurveyText,
+        questions: [
+            {prompt: 'Wil je vertellen wat je baan of hobby is?'}
+        ],
+        button_label: `Verder`       
+     }
+    const question_1_follow_up =  {
+        timeline: [question_1_follow_up_inner],
+        conditional_function: function(){
+            let prev_response = jsPsych.data.get().filter({label:'question_1'}).last(1).values()[0]['response']
+            
+            if (prev_response == 0) {
+                return true // true, i.e. run this trial
+            } else {
+                return false // false,  i.e. skip this trial
+            }
+        }    
+    }
+    
+    
 
     //...............................
     // Utility trials 
@@ -1451,8 +1502,7 @@
 
     let timeline = [user_info_trial, preload_intro_imgs, preload_imgs_with_call,   
 
-        intro_sequence,
-
+        intro_sequence, 
     ]
 
 
@@ -1505,6 +1555,8 @@
     timeline.pop() // remove last "inter_trial"
 
     timeline.push(save_data_final)
+    timeline.push(questions_intro, question_1, question_1_follow_up)
+
     timeline.push(debrief)
    
    
