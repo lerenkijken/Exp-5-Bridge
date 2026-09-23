@@ -1087,6 +1087,25 @@
             label:'sys_view_05',
         }        
     }
+    const halfway_trial = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: () =>  {
+            let t1 = `<h2 style="margin-bottom:0.1em">Goed bezig! Je bent op de helft!</h2>`
+             
+            let t2 = `<p style="margin-bottom:0em">Hier weer een reminder: Met het kijkplan bekijk je dus de beelden steeds van links naar rechts.<br>Eerst de rijbaan.</p>`+
+        `<img src="imgs/main_imgs/26 Totaal.png" style="width:${get_canvas_size()[1]*0.6}px"></img>`+
+            `<p style="margin-bottom:0em">Dan het fiets-/voetpad.</p>`+
+        `<img src="imgs/main_imgs/27 Totaal.png" style="width:${get_canvas_size()[1]*0.6}px"></img>`+
+            `<p style="margin-bottom:0em">Dan de randen.</p>`+
+        `<img src="imgs/main_imgs/28 Totaal.png" style="width:${get_canvas_size()[1]*0.6}px"></img>`+
+        `<p style="margin-bottom:0em">Als je het kijkplan goed volgt, bekijk je elk camerabeeld dus drie keer voordat je de brug bedient.</p>`
+            return search_condition == 'free' ? t1 : t1+t2
+    },
+        choices: () => [h2_button_html('Verder >')],
+        data:{
+            label:'sys_view_06',
+        }        
+    }
 
     const sys_view_sequence = {
         timeline:[sys_view_01, 
@@ -1468,7 +1487,9 @@
 
 
     // add the main experimental trials and trial dividers
+    let main_trial_counter = 0
     for (let event_number of shuffled_event_numbers) {
+        main_trial_counter ++
         timeline.push(
 
             stall_exp_until_loaded(event_number),
@@ -1476,6 +1497,10 @@
             save_data_inter_trail, // save data after evert completed trial
             inter_trial,
         )
+
+        if (main_trial_counter == 10) {
+             timeline.push(halfway_trial)
+        }
     }
     timeline.pop() // remove last "inter_trial"
 
