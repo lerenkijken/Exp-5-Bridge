@@ -1,22 +1,22 @@
-/* 
+
 html, body {
   overscroll-behavior: none;
-} */
+  overflow-y: scroll;
+}
 
 .jspsych-display-element {
   /* font-size: 25px; */
   background-color: black;
   color: white;
-  
-
 }
 
 .jspsych-content {
   background-color: black;
   color: white;
-  position: fixed;
-  left: 50%; 
-  transform: translateX(-50%);
+  position: relative;
+  top: -50%;
+  left: 0%; 
+  transform: translateY(50%);
 }
 
 .canvas-container {
@@ -37,7 +37,6 @@ html, body {
     font-family: Malington;
     -webkit-user-select: none; /* Safari */
             user-select: none; 
-     
 }
 
 .jspsych-btn:hover {
@@ -142,7 +141,6 @@ html, body {
     /* font-size: 20px; */
     padding: 0px;
     margin:0px;
-    
 }
 
 #jspsych-progressbar-outer {
