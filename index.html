@@ -1459,6 +1459,8 @@ h2_button_html('Weet ik niet (zeker)'), h2_button_html('Zeg ik liever niet')],
 
             summary_object['n_hits'] = n_hits
             summary_object['n_misses'] = n_misses
+            summary_object['n_correct_rejections'] = n_correct_rejections
+            summary_object['n_false_alarms'] = n_false_alarms
             summary_object['mean_rt'] = mean_rt
 
             jsPsych.data.get().first(1).values()[0]['user_summary_info'] = summary_object
