@@ -70,7 +70,7 @@ async function full_script_async_wrapper(){
     // determine 
     let  testing_mode = false
 
-    if (url_vars['testing'] == 'true'){
+    if (url_vars['testing'] == 'true' || url_vars['testing'] == true){
         testing_mode = true
     }
 
@@ -83,7 +83,6 @@ async function full_script_async_wrapper(){
     let exp_version = '0_3_2'
     const exp_id = 'exp_5_v'+exp_version
     console.log("Exp id: ", exp_id)
-    
     
     url_vars['exp_version'] = exp_version
     url_vars['exp_id'] = exp_id
