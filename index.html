@@ -30,10 +30,12 @@
 
   </head>
     <body oncontextmenu='return false;'></body>
-  <script>
-   async function full_script_async_wrapper(){
 
-/*
+
+<script>
+async function full_script_async_wrapper(){
+
+    /*
     blue
     Rgb 45,0,200
     Hex #2d00c8
@@ -49,10 +51,10 @@
     orange
     Rgb 254,153,0
     Hex #fe9900
-
+    */
     
-*/
-    //Initialize jsPsysch
+   
+    // Initialize jsPsysch
     const jsPsych = initJsPsych({
         show_progress_bar: true,
         message_progress_bar: '',
@@ -72,7 +74,7 @@
     const exp_conditions = ['systematic', 'free']
     const search_condition = jsPsych.randomization.sampleWithoutReplacement(exp_conditions, 1)[0]
 
-    let exp_version = '0_3_1'
+    let exp_version = '0_3_2'
     const exp_id = 'exp_5_v'+exp_version
     console.log("Exp id: ", exp_id)
     
@@ -88,6 +90,7 @@
     url_vars['search_condition'] = search_condition
     url_vars['testing_mode'] = testing_mode
 
+    console.log(url_vars)
 
     const user_info_trial = {
         type: jsPsychBrowserCheck,
@@ -670,14 +673,19 @@
             choices:() => [h2_button_html('Verder >')],
             prompt:() => {
                 if (search_condition == 'free') {
-                    return `<p style='padding:0em;margin:0.1em'>${interaction_type(true)} op een camerabeeld om het te openen. `+
-                           `${interaction_type(true)} op elk gekleurd gebied om te bevestigen dat je elk gebied hebt bekeken. Dan kun je verder!</p>` 
+                    return `<p style='padding:0em;margin:0.1em'>1. ${interaction_type(true)} bovenin op een camerabeeld om het te openen.`+
+                           `<br>2. ${interaction_type(true)} in elk van de drie de camerabeelden op de gekleurd gebieden om vinkjes te plaatsen (je bevestigt dat je weet waar je moet zoeken).`+
+                           `<br>3. Dan kun je verder!</p>`
                 } else if (event_id == '28') {
-                    return `<p style='padding:0em;margin:0.1em'>${interaction_type(true)} eerst op het linker camerabeeld om die te openen en `+
-                           `${interaction_type()} op <strong>BEIDE</strong> gekleurde vlakken. Doe dan hetzelfde bij het middelste beeld, en daarna bij het rechter beeld. Dan kun je verder! `
+                    return `<p style='padding:0em;margin:0.1em'>1. ${interaction_type(true)} eerst bovenin op het camerabeeld LINKS om het te openen.`+
+                           `<br>2. ${interaction_type(true)} <strong>BEIDE</strong> gekleurde vlakken om 2 vinkjes te plaatsen (je bevestigt dat je weet waar je moet zoeken).`+
+                           `<br>3. Doe dan hetzelfde bij het MIDDELSTE beeld, en daarna bij het beeld RECHTS.`+
+                           `<br>4. Dan kun je verder!</p>`
                 } else {
-                    return `<p style='padding:0em;margin:0.1em'>${interaction_type(true)} eerst op het linker camerabeeld om die te openen en `+
-                           `${interaction_type()} op het gekleurde vlak. Doe dan hetzelfde bij het middelste beeld, en daarna bij het rechter beeld. Dan kun je verder! `
+                    return `<p style='padding:0em;margin:0.1em'>1. ${interaction_type(true)} eerst bovenin op het camerabeeld LINKS om het te openen.`+
+                           `<br>2. ${interaction_type(true)} op het gekleurde vlak om een vinkje te plaatsen (je bevestigt dat je weet waar je moet zoeken).`+
+                           `<br>3. Doe dan hetzelfde bij het MIDDELSTE beeld, en daarna bij het beeld RECHTS.`+
+                           `<br>4. Dan kun je verder!</p>`
                 }
             
             },
@@ -1166,7 +1174,7 @@
          + close_window_text
         },
         grid_rows:2,
-        choices: () => (url_vars.oid == 'betweter') ? [] : [h2_button_html("Probeer het nog eens!"), h2_button_html("Doe een ander Experiment")] ,
+        choices: () => (url_vars.oid == 'betweter') ? [] : [h2_button_html("Probeer het nog eens!"), h2_button_html("Doe een ander experiment")] ,
         data:{
             label:'debrief',
         },
@@ -1310,6 +1318,8 @@
     //...............................
     // Final questions
     //...............................
+
+    
     const questions_intro = {
         type: jsPsychHtmlButtonResponse,
         stimulus: () =>  `<h2>Jouw dienst zit erop!</h2>`+
@@ -1322,7 +1332,7 @@
 
     const question_1 = {
         type: jsPsychHtmlButtonResponse,
-        stimulus: () =>  `<p>Heb jij een baan of hobby waarbij je goed moet kijken en geen belangrijke dingen mag missen (bijvoorbeeld beveiliger, radioloog, fotograaf, etc.)?</p>`,
+        stimulus: () =>  `<p>Heb jij een baan of hobby waarbij je echt goed moet kunnen <i>kijken</i> (bijvoorbeeld beveiliger, radioloog, fotograaf, etc.)?</p>`,
         choices: () => [h2_button_html('Ja'), h2_button_html('Nee'), 
 h2_button_html('Weet ik niet (zeker)'), h2_button_html('Zeg ik liever niet')],
         grid_rows:4,
@@ -1335,7 +1345,7 @@ h2_button_html('Weet ik niet (zeker)'), h2_button_html('Zeg ik liever niet')],
     const question_1_follow_up_inner = {
         type: jsPsychSurveyText,
         questions: [
-            {prompt: 'Wil je vertellen wat je baan of hobby is?', rows:2}
+            {prompt: 'Wat is je baan of hobby?', rows:2}
         ],
         button_label: `Verder`       
      }
@@ -1351,8 +1361,148 @@ h2_button_html('Weet ik niet (zeker)'), h2_button_html('Zeg ik liever niet')],
             }
         }    
     }
+
+    ////////////////
+    //// Q's for operators!
+    ///////////////
+
+    const q_intro_operator = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: () =>  `<h2>Jouw dienst zit erop!</h2>`+
+        `<p>Voordat we naar je score gaan, hebben we nog een paar vragen.</p>`,
+        choices: () => [h2_button_html('Verder >')],
+        data:{
+            label:'q_intro_operator',
+        }   
+    }
+
+    const q_1_operator = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: () =>  `<p>Wat is jouw functie?</p>`,
+        choices: () => [
+            h2_button_html('Nautisch operator (bedienaar)'), 
+            h2_button_html('VTS-operator (verkeersleider)'), 
+            h2_button_html('Wegverkeersleider '), 
+            h2_button_html('Anders'), 
+            h2_button_html('Zeg ik liever niet')],
+        grid_rows:5,
+        data:{
+            label:'q_1_operator',
+        }   
+    }
+
+    const q_1_operator_follow_up_inner = {
+        type: jsPsychSurveyText,
+        questions: [
+            {prompt: 'Vul hier in wat je functie is.', rows:2}
+        ],
+        button_label: `Verder`       
+    }
+
+    const q_1_follow_up_operator =  {
+        timeline: [q_1_operator_follow_up_inner],
+        conditional_function: function(){
+            let prev_response = jsPsych.data.get().filter({label:'q_1_operator'}).last(1).values()[0]['response']
+            
+            if (prev_response == 3) {
+                return true // true, i.e. run this trial
+            } else {
+                return false // false,  i.e. skip this trial
+            }
+        }    
+    }
+
+    const q_2_operator = {
+        type: jsPsychSurveyText,
+        questions: [
+            {prompt: 'Hoe lang werk je in jouw huidige functie? (Bijvoorbeeld: 1 jaar en 2 maanden.)', rows:2, placeholder:'XX jaar en XX maanden'}
+        ],
+        button_label: `Verder`,
+        data:{
+            label:'q_2_operator',
+        }       
+     }
     
+    const q_3_operator = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: () =>  `<p>Heb je ervaring met het op afstand bedienen van bruggen en/of sluizen?</p>`,
+        choices: () => [
+            h2_button_html('Ja, dat doe ik nu'), 
+            h2_button_html('Ja, dat heb ik eerder gedaan'), 
+            h2_button_html('Nee'), 
+            h2_button_html('Zeg ik liever niet')],
+        grid_rows:4,
+        data:{
+            label:'q_3_operator',
+        }   
+    }
     
+
+    const q_3_operator_follow_up_1_inner = {
+        type: jsPsychSurveyText,
+        questions: [
+            {prompt: 'Hoeveel ervaring heb je met het op afstand bedienen van bruggen en/of sluizen? (Bijvoorbeeld: 1 jaar en 2 maanden.)', rows:2, placeholder:'XX jaar en XX maanden'}
+        ],
+        button_label: `Verder` ,
+        data:{
+            label:'q_3_operator_follow_up_1_inner',
+        }       
+    }
+    
+    const q_3_operator_follow_up_2_inner = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: () =>  `<p>Heb je tijdens je opleiding een waarnemingsstrategie geleerd zoals het OGEN-principe?</p>`,
+        choices: () => [
+            h2_button_html('Ja'), 
+            h2_button_html('Nee'), 
+            h2_button_html('Weet ik niet (zeker)'), 
+            h2_button_html('Zeg ik liever niet')],
+        grid_rows:4,
+        data:{
+            label:'q_3_operator_follow_up_2_inner',
+        }   
+    }
+
+    const q_3_operator_follow_up_3_inner = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: () =>  `<p>Ken je het huidige cameraplan van de Haringvlietbrug?</p>`,
+        choices: () => [
+            h2_button_html('Ja'), 
+            h2_button_html('Nee'), 
+            h2_button_html('Weet ik niet (zeker)'), 
+            h2_button_html('Zeg ik liever niet')],
+        grid_rows:4,
+        data:{
+            label:'q_3_operator_follow_up_3_inner',
+        }   
+    }
+
+    const q_3_operator_follow_up_4_inner = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: () =>  `<p>Heb je de Haringvlietbrug eerder bediend?</p>`,
+        choices: () => [
+            h2_button_html('Ja'), 
+            h2_button_html('Nee'), 
+            h2_button_html('Weet ik niet (zeker)'), 
+            h2_button_html('Zeg ik liever niet')],
+        grid_rows:4,
+        data:{
+            label:'q_3_operator_follow_up_4_inner',
+        }   
+    }
+
+    const q_3_follow_up_operator =  {
+        timeline: [q_3_operator_follow_up_1_inner, q_3_operator_follow_up_2_inner, q_3_operator_follow_up_3_inner, q_3_operator_follow_up_4_inner],
+        conditional_function: function(){
+            let prev_response = jsPsych.data.get().filter({label:'q_3_operator'}).last(1).values()[0]['response']
+            
+            if (prev_response < 2) {
+                return true // true, i.e. run sub-timeline
+            } else {
+                return false // false,  i.e. skip sub-timeline
+            }
+        }    
+    }
 
     //...............................
     // Utility trials 
@@ -1510,11 +1660,13 @@ h2_button_html('Weet ik niet (zeker)'), h2_button_html('Zeg ik liever niet')],
     //////////////////////////////////////////  
 
     let timeline = [user_info_trial, preload_intro_imgs, preload_imgs_with_call,   
-        intro_sequence, 
+        
 
         /// TESTING TRIAL
-        
+
         /// TESTING TRIALS
+        
+        intro_sequence, 
     ]
 
 
@@ -1564,10 +1716,17 @@ h2_button_html('Weet ik niet (zeker)'), h2_button_html('Zeg ik liever niet')],
              timeline.push(halfway_trial)
         }
     }
+
     timeline.pop() // remove last "inter_trial"
 
 
-    timeline.push(questions_intro, question_1, question_1_follow_up)
+    // add questions for different participants:
+    if (url_vars['suboid'] == 'operatie-svm' ||  url_vars['suboid'] == 'operatie-wvm') {
+        timeline.push(q_intro_operator, q_1_operator, q_1_follow_up_operator, q_2_operator, q_3_operator, q_3_follow_up_operator)
+    } else {
+        timeline.push(questions_intro, question_1, question_1_follow_up)
+    }
+
 
     timeline.push(save_data_final)
     timeline.push(debrief)
@@ -1622,8 +1781,11 @@ h2_button_html('Weet ik niet (zeker)'), h2_button_html('Zeg ik liever niet')],
 
 
 
-}  full_script_async_wrapper()
-  </script>
+}  
+
+full_script_async_wrapper()
+
+</script>
 </html>
 
 
