@@ -64,10 +64,16 @@ async function full_script_async_wrapper(){
         }
 
     });
-
+    // get url vars
+    const url_vars = jsPsych.data.urlVariables()
 
     // determine 
-    const testing_mode = false
+    let  testing_mode = false
+
+    if (url_vars['testing'] == 'true'){
+        testing_mode = true
+    }
+
     if (testing_mode) {
         document.body.style.backgroundImage = `url("bgimg.png")`
     }
@@ -78,7 +84,6 @@ async function full_script_async_wrapper(){
     const exp_id = 'exp_5_v'+exp_version
     console.log("Exp id: ", exp_id)
     
-    const url_vars = jsPsych.data.urlVariables()
     
     url_vars['exp_version'] = exp_version
     url_vars['exp_id'] = exp_id
