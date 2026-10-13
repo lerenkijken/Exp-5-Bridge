@@ -68,11 +68,11 @@ async function full_script_async_wrapper(){
     const url_vars = jsPsych.data.urlVariables()
 
     // determine 
-    let  testing_mode = false
+    let testing_mode =  url_vars['testing'] == 'true' ? true : false
 
-    if (url_vars['testing'] == 'true' || url_vars['testing'] == true){
-        testing_mode = true
-    }
+
+    // manually set testing mode
+    // testing_mode = false
 
     if (testing_mode) {
         document.body.style.backgroundImage = `url("bgimg.png")`
