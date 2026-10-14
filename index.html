@@ -253,7 +253,8 @@ async function full_script_async_wrapper(){
         return fabric_img
     }
     
-
+    let eye_icon = await load_img_fabric ('eye_icon')
+    
     
 
     //..................................
@@ -676,20 +677,25 @@ async function full_script_async_wrapper(){
             canvas_size: get_canvas_size,
             choices:() => [h2_button_html('Verder >')],
             prompt:() => {
-                if (search_condition == 'free') {
+                if (search_condition == 'free') { // red
                     return `<p style='padding:0em;margin:0.1em'>1. ${interaction_type(true)} bovenin op een camerabeeld om het te openen.`+
-                           `<br>2. ${interaction_type(true)} in elk van de drie de camerabeelden op de gekleurd gebieden om vinkjes te plaatsen (je bevestigt dat je weet waar je moet zoeken).`+
-                           `<br>3. Dan kun je verder!</p>`
-                } else if (event_id == '28') {
+                           `<br>2. ${interaction_type(true)} in ALLE drie de camerabeelden op het RODE vlak om met een oog-icoontje te bevestigen dat je het hebt bekeken.`+
+                           `<br>Dan kun je verder!</p>`
+                } else if (event_id == '26') {  // blue
                     return `<p style='padding:0em;margin:0.1em'>1. ${interaction_type(true)} eerst bovenin op het camerabeeld LINKS om het te openen.`+
-                           `<br>2. ${interaction_type(true)} <strong>BEIDE</strong> gekleurde vlakken om 2 vinkjes te plaatsen (je bevestigt dat je weet waar je moet zoeken).`+
-                           `<br>3. Doe dan hetzelfde bij het MIDDELSTE beeld, en daarna bij het beeld RECHTS.`+
-                           `<br>4. Dan kun je verder!</p>`
-                } else {
+                           `<br>2. ${interaction_type(true)} op het BLAUWE vlak om met een oog-icoontje te bevestigen dat je het hebt bekeken.`+
+                           `<br>3. Plaats dan de oog-icoontjes ook voor het MIDDELSTE beeld, en als laatst bij het beeld RECHTS.`+
+                           `<br>Dan kun je verder!</p>`
+                } else if (event_id == '27'){ // green
                     return `<p style='padding:0em;margin:0.1em'>1. ${interaction_type(true)} eerst bovenin op het camerabeeld LINKS om het te openen.`+
-                           `<br>2. ${interaction_type(true)} op het gekleurde vlak om een vinkje te plaatsen (je bevestigt dat je weet waar je moet zoeken).`+
-                           `<br>3. Doe dan hetzelfde bij het MIDDELSTE beeld, en daarna bij het beeld RECHTS.`+
-                           `<br>4. Dan kun je verder!</p>`
+                           `<br>2. ${interaction_type(true)} op het GROENE vlak om met een oog-icoontje te bevestigen dat je het hebt bekeken.`+
+                           `<br>3. Plaats dan de oog-icoontjes ook voor het MIDDELSTE beeld, en als laatst bij het beeld RECHTS.`+
+                           `<br>Dan kun je verder!</p>`
+                } else if (event_id == '28') {// yellow
+                    return `<p style='padding:0em;margin:0.1em'>1. ${interaction_type(true)} eerst bovenin op het camerabeeld LINKS om het te openen.`+
+                           `<br>2. ${interaction_type(true)} op <strong>BEIDE GELE</strong> vlakken om met 2 oog-icoontjes te bevestigen dat je het hebt bekeken.`+
+                           `<br>3. Plaats dan de oog-icoontjes ook voor het MIDDELSTE beeld, en als laatst bij het beeld RECHTS.`+
+                           `<br>Dan kun je verder!</p>`
                 }
             
             },
@@ -767,7 +773,6 @@ async function full_script_async_wrapper(){
                     canvas.add(view_indicator)
                     
 
-
                     // record view change
                     view_sequence.push({
                         view:view_label,
@@ -799,29 +804,44 @@ async function full_script_async_wrapper(){
                     //     radius: canvas_diag*0.024 , fill: 'rgba(0,0,0,0)', stroke:'rgba(255,0,0,0.65)', strokeWidth:canvas_diag*0.012,
                     // });
                     let s = canvas_diag*0.024 *2
-                    let loc_indicator = new fabric.Polyline([
-                            { x: s*0.05, y: s*0.35 },
-                            { x: s*0.4, y: s*0.7  },
-                            { x: s*0.99, y: s*0.1  },
-                        ],{
-                        width: s,
-                        height: s,
-                        stroke:'rgba(0,0,0,1)', strokeWidth:canvas_diag*0.012,
-                        fill:'rgba(0,0,0,0)'
-                    });
+                    
+                    // draw a checkmark 
+                    // let loc_indicator = new fabric.Polyline([
+                    //         { x: s*0.05, y: s*0.35 },
+                    //         { x: s*0.4, y: s*0.7  },
+                    //         { x: s*0.99, y: s*0.1  },
+                    //     ],{
+                    //     width: s,
+                    //     height: s,
+                    //     stroke:'rgba(0,0,0,1)', strokeWidth:canvas_diag*0.012,
+                    //     fill:'rgba(0,0,0,0)'
+                    // });
 
+                    // loc_indicator.set({
+                    //     left:0.1*canvas_rect().height , 
+                    //     top: 0.1*canvas_rect().height,
+                    //     width: s,
+                    //     height: s,
+                    // })
+
+                    // // replace with eye icon:
+                    let loc_indicator = fabric.util.object.clone(eye_icon)
 
                     loc_indicator.set({
                         left:0.1*canvas_rect().height , 
-                        top: 0.1*canvas_rect().height
+                        top: 0.1*canvas_rect().height,
+                        scaleX:s*0.0062,
+                        scaleY:s*0.0062,
                     })
+
+
                     
 
 
                     if (event_id == '28') { // for yellow areas make clear that there are 2 checkmarks!
                         loc_indicator.set({
                             left:0.1*canvas_rect().height , 
-                            top: (0.08 + 0.04*i)*canvas_rect().height
+                            top: (0.12 - 0.04*i)*canvas_rect().height
                         })
                     } 
                     //store initial locations on canvas
@@ -831,6 +851,7 @@ async function full_script_async_wrapper(){
                     // add to canvas 
                     loc_indicator.setCoords()
                     canvas.add(loc_indicator)
+                    // canvas.add(eye_icon)
                     loc_indicators_array.push(loc_indicator)
                 }
 
@@ -851,7 +872,36 @@ async function full_script_async_wrapper(){
 
                 canvas.add(view_indicator)
                            
+                // create view_confirmation
 
+                let view_confirmator_L = new fabric.Rect({
+                    width: tot_img.width*tot_img_scale / 3, 
+                    height: 0.95 * tot_img.height*tot_img_scale, 
+                    left: canvas_rect().width/2 - (tot_img_scale * (tot_img.width/3) ) , 
+                    top: 0.1*canvas_rect().height,
+                    fill: 'rgba(0,0,0,0)', strokeWidth: 0, 
+                });
+                let view_confirmator_M = new fabric.Rect({
+                    width:  tot_img.width*tot_img_scale / 3, 
+                    height: 0.95 * tot_img.height*tot_img_scale, 
+                    left: canvas_rect().width/2, 
+                    top: 0.1*canvas_rect().height,
+                    fill: 'rgba(0,0,0,0)', strokeWidth: 0, 
+                });
+                let view_confirmator_R = new fabric.Rect({
+                    width: tot_img.width*tot_img_scale / 3, 
+                    height: 0.95 * tot_img.height*tot_img_scale, 
+                    left: canvas_rect().width/2 + (tot_img_scale * (tot_img.width/3) ) , 
+                    top: 0.1*canvas_rect().height,
+                    fill: 'rgba(0,0,0,0)', strokeWidth: 0, 
+                });
+                
+
+                canvas.add(view_confirmator_L)
+                canvas.add(view_confirmator_M)
+                canvas.add(view_confirmator_R)
+
+         
 
                 // handle location reports and view changes
                 
@@ -926,6 +976,23 @@ async function full_script_async_wrapper(){
                             
                             reported_area_flags[current_view] += 1
                             reported_area_flags[current_view] = Math.min(checks_per_view, reported_area_flags[current_view])
+
+                            if( current_view == "Links" && reported_area_flags[current_view] >= checks_per_view){
+                                view_confirmator_L.set({fill:'rgba(0,0,0,0.6)'})
+                                canvas.remove(view_confirmator_L);canvas.add(view_confirmator_L);
+                            }
+                            if( current_view == "Midden" && reported_area_flags[current_view] >= checks_per_view){
+                                view_confirmator_M.set({fill:'rgba(0,0,0,0.6)'})
+                                canvas.remove(view_confirmator_M);canvas.add(view_confirmator_M);
+                            }
+                            if( current_view == "Rechts" && reported_area_flags[current_view] >= checks_per_view){
+                                view_confirmator_R.set({fill:'rgba(0,0,0,0.6)'})
+                                canvas.remove(view_confirmator_R);canvas.add(view_confirmator_R);
+                            }
+
+                            // bring indicator to front
+                            canvas.remove(view_indicator)
+                            canvas.add(view_indicator)
                             
                             // if enough areas checked enable the continue button 
                             let required_reports = 3 * checks_per_view
@@ -955,21 +1022,28 @@ async function full_script_async_wrapper(){
                             if ( (report_x > tot_img_edge_2) && (report_x <= tot_img_edge_3) ) { // indicate Right
                                 if( current_view != "Rechts") {set_view_img("Rechts")}
                             }
-                
+                            
 
+                            
                             // reset all loc indicators to original position
                             for (let loc_indicator of loc_indicators_array) {
-                                
-                                loc_indicator.animate('left', loc_indicator.init_left, {
-                                    onChange: canvas.renderAll.bind(canvas),
-                                    duration: 150,
-                                    easing: fabric.util.ease.easeOutQuad              
+                                //set to new loc
+                                loc_indicator.set({
+                                    'left': loc_indicator.init_left,
+                                    'top': loc_indicator.init_top,
                                 })
-                                loc_indicator.animate('top', loc_indicator.init_top, {
-                                    onChange: canvas.renderAll.bind(canvas),
-                                    duration: 150,
-                                    easing: fabric.util.ease.easeOutQuad              
-                                }) 
+
+                                // animate
+                                // loc_indicator.animate('left', loc_indicator.init_left, {
+                                //     onChange: canvas.renderAll.bind(canvas),
+                                //     duration: 150,
+                                //     easing: fabric.util.ease.easeOutQuad              
+                                // })
+                                // loc_indicator.animate('top', loc_indicator.init_top, {
+                                //     onChange: canvas.renderAll.bind(canvas),
+                                //     duration: 150,
+                                //     easing: fabric.util.ease.easeOutQuad              
+                                // }) 
                                 canvas.remove(loc_indicator)
                                 canvas.add(loc_indicator)   
                             }
@@ -1061,7 +1135,7 @@ async function full_script_async_wrapper(){
         type: jsPsychHtmlButtonResponse,
         stimulus: () =>  `<img src="imgs/main_imgs/26 Totaal.png" style="width:${get_canvas_size()[1]}px"></img>`+
         `<p>Je begint met kijken naar de rijbaan (hier blauw gemarkeerd).<br>Eerst links, dan midden, dan rechts.</p>`,
-        choices: () => [h2_button_html('Verder >')],
+        choices: () => [h2_button_html('Oefenen >')],
         data:{
             label:'sys_view_02',
         }        
@@ -1071,7 +1145,7 @@ async function full_script_async_wrapper(){
         type: jsPsychHtmlButtonResponse,
         stimulus: () =>  `<img src="imgs/main_imgs/27 Totaal.png" style="width:${get_canvas_size()[1]}px"></img>`+
         `<p>Dan kijk je naar het fiets-/voetpad (hier groen gemarkeerd).<br>Eerst links, dan midden, dan rechts.</p>`,
-        choices: () => [h2_button_html('Verder >')],
+        choices: () => [h2_button_html('Oefenen >')],
         data:{
             label:'sys_view_03',
         }        
@@ -1081,7 +1155,7 @@ async function full_script_async_wrapper(){
         type: jsPsychHtmlButtonResponse,
         stimulus: () =>  `<img src="imgs/main_imgs/28 Totaal.png" style="width:${get_canvas_size()[1]}px"></img>`+
         `<p>Als laatste kijk je naar de randen (hier geel gemarkeerd).<br>Eerst links, dan midden, dan rechts.</p>`,
-        choices: () => [h2_button_html('Verder >')],
+        choices: () => [h2_button_html('Oefenen >')],
         data:{
             label:'sys_view_04',
         }        
@@ -1089,7 +1163,7 @@ async function full_script_async_wrapper(){
     const sys_view_05 = {
         type: jsPsychHtmlButtonResponse,
         stimulus: () =>  `<h2 style="margin-bottom:0.1em;margin-top:0em">Goed bezig! Dat waren alle stappen!</h2>` +
-            `<p style="margin-bottom:0em">Met het kijkplan bekijk je dus de beelden steeds van links naar rechts.<br>Eerst de rijbaan.</p>`+
+            `<p style="margin-bottom:0em">Met het kijkplan bekijk je dus de 3 camerabeelden steeds van links naar rechts.<br>Eerst de rijbaan.</p>`+
         `<img src="imgs/main_imgs/26 Totaal.png" style="width:${get_canvas_size()[1]*0.6}px"></img>`+
             `<p style="margin-bottom:0em">Dan het fiets-/voetpad.</p>`+
         `<img src="imgs/main_imgs/27 Totaal.png" style="width:${get_canvas_size()[1]*0.6}px"></img>`+
@@ -1203,10 +1277,10 @@ async function full_script_async_wrapper(){
         type: jsPsychHtmlButtonResponse,
         stimulus: () => `<h2>Nu weet je waar je moet kijken.</h2>`+
         `<p>Laten we ook kort oefenen met bedienen.</p>` +
-        `<p>Zie je iets of iemand op de brug dat daar niet hoort? ${interaction_type(true)} dan op wat van de brug af moet en ${interaction_type()} op "INGRIJPEN".</p>` +
+        `<p>Zie je iets of iemand op de brug dat daar niet hoort? ${interaction_type(true)} dan op wat van de brug af moet. Er verschijnt een rode cirkel om je keuze. ${interaction_type(true)} daarna op ${interaction_type()} op "INGRIJPEN".</p>` +
         `<p>Zie je meerdere dingen? Wijs het dan allemaal aan! Dat hoeft maar in één camerabeeld.</p>`+
         `<p>Zie je niets gevaarlijks op de brug? ${interaction_type(true)} dan op "BRUG OPENEN".</p>`,
-        choices:() => [h2_button_html('Oefen!')],
+        choices:() => [h2_button_html('Oefenen!')],
         data:{
             label:'pre_practice_trials',
         }
@@ -1725,7 +1799,7 @@ h2_button_html('Weet ik niet (zeker)'), h2_button_html('Zeg ik liever niet')],
 
 
     // add questions for different participants:
-    if (url_vars['suboid'] == 'operatie-svm' ||  url_vars['suboid'] == 'operatie-wvm') {
+    if (url_vars['suboid'] == 'operatie-svm' ||  url_vars['suboid'] == 'operatie-wvm' ||  url_vars['suboid'] == 'intern') {
         timeline.push(q_intro_operator, q_1_operator, q_1_follow_up_operator, q_2_operator, q_3_operator, q_3_follow_up_operator)
     } else {
         timeline.push(questions_intro, question_1, question_1_follow_up)
