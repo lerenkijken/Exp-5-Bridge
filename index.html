@@ -80,7 +80,7 @@ async function full_script_async_wrapper(){
     const exp_conditions = ['systematic', 'free']
     const search_condition = jsPsych.randomization.sampleWithoutReplacement(exp_conditions, 1)[0]
 
-    let exp_version = '0_3_3'
+    let exp_version = '0_3_4'
     const exp_id = 'exp_5_v'+exp_version
     console.log("Exp id: ", exp_id)
     
@@ -679,7 +679,7 @@ async function full_script_async_wrapper(){
             prompt:() => {
                 if (search_condition == 'free') { // red
                     return `<p style='padding:0em;margin:0.1em'>1. ${interaction_type(true)} bovenin op een camerabeeld om het te openen.`+
-                           `<br>2. ${interaction_type(true)} in ALLE drie de camerabeelden op het RODE vlak om met een oog-icoontje te bevestigen dat je het hebt bekeken.`+
+                           `<br>2. ${interaction_type(true)} in ALLE DRIE de camerabeelden op het RODE vlak om met een oog-icoontje te bevestigen dat je het hebt bekeken.`+
                            `<br>Dan kun je verder!</p>`
                 } else if (event_id == '26') {  // blue
                     return `<p style='padding:0em;margin:0.1em'>1. ${interaction_type(true)} eerst bovenin op het camerabeeld LINKS om het te openen.`+
@@ -693,7 +693,7 @@ async function full_script_async_wrapper(){
                            `<br>Dan kun je verder!</p>`
                 } else if (event_id == '28') {// yellow
                     return `<p style='padding:0em;margin:0.1em'>1. ${interaction_type(true)} eerst bovenin op het camerabeeld LINKS om het te openen.`+
-                           `<br>2. ${interaction_type(true)} op <strong>BEIDE GELE</strong> vlakken om met 2 oog-icoontjes te bevestigen dat je het hebt bekeken.`+
+                           `<br>2. ${interaction_type(true)} op <strong>BEIDE</strong> GELE vlakken om met 2 oog-icoontjes te bevestigen dat je het hebt bekeken.`+
                            `<br>3. Plaats dan de oog-icoontjes ook voor het MIDDELSTE beeld, en als laatst bij het beeld RECHTS.`+
                            `<br>Dan kun je verder!</p>`
                 }
@@ -1277,7 +1277,7 @@ async function full_script_async_wrapper(){
         type: jsPsychHtmlButtonResponse,
         stimulus: () => `<h2>Nu weet je waar je moet kijken.</h2>`+
         `<p>Laten we ook kort oefenen met bedienen.</p>` +
-        `<p>Zie je iets of iemand op de brug dat daar niet hoort? ${interaction_type(true)} dan op wat van de brug af moet. Er verschijnt een rode cirkel om je keuze. ${interaction_type(true)} daarna op ${interaction_type()} op "INGRIJPEN".</p>` +
+        `<p>Zie je iets of iemand op de brug dat daar niet hoort? ${interaction_type(true)} dan op wat van de brug af moet. Er verschijnt een rode cirkel om je keuze. ${interaction_type(true)} daarna op "INGRIJPEN".</p>` +
         `<p>Zie je meerdere dingen? Wijs het dan allemaal aan! Dat hoeft maar in één camerabeeld.</p>`+
         `<p>Zie je niets gevaarlijks op de brug? ${interaction_type(true)} dan op "BRUG OPENEN".</p>`,
         choices:() => [h2_button_html('Oefenen!')],
